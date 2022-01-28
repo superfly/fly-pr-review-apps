@@ -1,11 +1,20 @@
 #!/bin/sh -l
 
-if [ -n "$FLY_PROJECT_PATH" ]; then
+if [ -n "$INPUT_PATH" ]; then
   PREV_PATH=$(pwd)
   # Allow user to change directories in which to run Fly commands
-  cd "$FLY_PROJECT_PATH" || exit
+  cd "$INPUT_PATH" || exit
 fi
-sh -c "flyctl $*"
+
+PR_NUMBER=$(echo "$GITHUB_REF" | awk 'BEGIN { FS = "/" } ; { print $3 }')
+
+echo "PR_NUMBER: $PR_NUMBER"
+echo "app: $INPUT_APP_PREFIX-pr$PR_NUMBER"
+
+env
+
+echo "workflow/event.json:"
+cat workflow/event.json
 
 ACTUAL_EXIT="$?"
 

@@ -1,5 +1,5 @@
-name: "GitHub Action for flyctl"
-description: "Wraps the flyctl CLI tool to enable deploying and managing Fly apps"
+name: "GitHub Action for deplying staging apps on fly.io"
+description: "Wraps the flyctl CLI tool to enable managing temporary staging apps on Fly"
 author: Fly
 branding:
   icon: "upload-cloud"
@@ -7,3 +7,19 @@ branding:
 runs:
   using: "docker"
   image: "Dockerfile"
+inputs:
+  action:
+    description: create, deploy, or destroy
+  app-prefix:
+    description: App name that will be suffixed with e.g. *-pr123 based on the PR
+    required: true
+  image:
+    description: Optional pre-existing Docker image to use
+  region:
+    description: Region to launch the app in (alternatively, set the env FLY_REGION)
+  org:
+    description: Organization to launch the app in (alternatively, set the env FLY_ORG)
+  path:
+    description: path to a directory with a pre-existing fly.toml which will be copied
+  postgres:
+    description: Optionally attach the app to a pre-existing postgres cluster on Fly
