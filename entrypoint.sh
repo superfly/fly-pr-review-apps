@@ -9,7 +9,7 @@ fi
 PR_NUMBER=$(echo "$GITHUB_REF" | awk 'BEGIN { FS = "/" } ; { print $3 }')
 
 echo "PR_NUMBER: $PR_NUMBER"
-echo "app: $INPUT_APP_PREFIX-pr$PR_NUMBER"
+echo "app: $INPUT_NAME-pr$PR_NUMBER"
 
 env
 
