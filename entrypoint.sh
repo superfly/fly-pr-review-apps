@@ -13,16 +13,7 @@ echo "app: $INPUT_NAME-pr$PR_NUMBER"
 
 env
 
-pwd
-
-echo workflow
-ls -la /github/workflow
-
-echo file_commands
-ls -la /github/file_commands
-
-echo home
-ls -la /github/home
+cat /github/workflow/event.json
 
 ACTUAL_EXIT="$?"
 
