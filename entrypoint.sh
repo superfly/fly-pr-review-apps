@@ -10,7 +10,7 @@ fi
 # PR_NUMBER=$(echo "$GITHUB_REF" | awk 'BEGIN { FS = "/" } ; { print $3 }')
 EVENT_TYPE=$(jq -r .action /github/workflow/event.json)
 
-app="$INPUT_APP" # TODO: default this to something based on repo+PR_NUMBER
+app="$INPUT_NAME" # TODO: default this to something based on repo+PR_NUMBER
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
