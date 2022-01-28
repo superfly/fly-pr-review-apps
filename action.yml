@@ -10,7 +10,7 @@ runs:
 inputs:
   action:
     description: create, deploy, or destroy
-  app-prefix:
+  name:
     description: App name that will be suffixed with e.g. *-pr123 based on the PR
     required: true
   image:
