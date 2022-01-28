@@ -35,9 +35,9 @@ elif [ "$EVENT_TYPE" = "synchronize" ] && [ "$INPUT_UPDATE" != "false" ]; then
 fi
 
 # Output the app URL to make it available to the GitHub workflow.
-url=$(fly info --json | jq -r .App.AppURL) || true
-if [ -n "$url" ]; then
-  echo "::set-output name=url::$url"
+hostname=$(fly info --json | jq -r .App.Hostname) || true
+if [ -n "$hostname" ]; then
+  echo "::set-output name=url::https://$hostname"
 fi
 
 # PR was closed - remove the Fly app.
