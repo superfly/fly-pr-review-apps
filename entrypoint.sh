@@ -17,7 +17,7 @@ org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 # PR was opened or reopened
 if [ "$EVENT_TYPE" = "opened" ] || [ "$EVENT_TYPE" = "reopened" ]; then
 
-  flyctl launch --now --name "$app" --region "$region" --org "$org" --copy-config
+  flyctl launch --now --name "$app" --image "$INPUT_IMAGE" --region "$region" --org "$org" --copy-config
 
   # Attach postgres cluster to the new app if needed
   if [ -n "$INPUT_POSTGRES" ]; then
