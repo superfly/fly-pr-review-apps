@@ -8,11 +8,8 @@ runs:
   using: "docker"
   image: "Dockerfile"
 inputs:
-  action:
-    description: create, deploy, or destroy
   name:
-    description: App name that will be suffixed with e.g. *-pr123 based on the PR
-    required: true
+    description: Fly app name
   image:
     description: Optional pre-existing Docker image to use
   region:
