@@ -34,8 +34,11 @@ elif [ "$EVENT_TYPE" = "synchronize" ] && [ "$INPUT_UPDATE" != "false" ]; then
 
 fi
 
+# Avoid a prompt from flyctl when a fly.toml is present with a different name.
+cd /tmp
+
 # Output the app URL to make it available to the GitHub workflow.
-hostname=$(fly info --json | jq -r .App.Hostname) || true
+hostname=$(fly info --app "$app" --json | jq -r .App.Hostname) || true
 if [ -n "$hostname" ]; then
   echo "::set-output name=url::https://$hostname"
 fi
