@@ -53,7 +53,7 @@ jobs:
 
       - name: Deploy
         id: deploy
-        uses: brentd/fly-staging-app@latest
+        uses: brentd/fly-staging-app@v1
 ```
 
 ## Cleaning up GitHub environments
@@ -81,7 +81,7 @@ jobs:
 
       - name: Deploy app
         id: deploy
-        uses: brentd/fly-staging-app@latest
+        uses: brentd/fly-staging-app@v1
 
       - name: Clean up GitHub environment
         uses: strumwolf/delete-deployment-environment@v2
@@ -105,7 +105,7 @@ steps:
 
   - name: Deploy app
     id: deploy
-    uses: brentd/fly-staging-app@latest
+    uses: brentd/fly-staging-app@v1
     with:
       postgres: myapp-postgres-staging-apps
 ```
@@ -120,14 +120,14 @@ Redis example:
 steps:
   - uses: actions/checkout@v2
 
-  - name: Deploy Redis
-    uses: brentd/fly-staging-app@latest
+  - name: Deploy redis
+    uses: brentd/fly-staging-app@v1
     with:
       name: pr-${{ github.event.number }}-myapp-redis
 
   - name: Deploy app
     id: deploy
-    uses: brentd/fly-staging-app@latest
+    uses: brentd/fly-staging-app@v1
     with:
       name: pr-${{ github.event.number }}-myapp-app
 ```
