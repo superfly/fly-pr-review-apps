@@ -1,5 +1,5 @@
-name: "GitHub Action for deplying staging apps on fly.io"
-description: "Wraps the flyctl CLI tool to enable managing temporary staging apps on Fly"
+name: "Staging apps on fly.io"
+description: "Wraps the flyctl CLI tool to enable managing temporary staging apps per Pull Request on Fly.io"
 author: Fly
 branding:
   icon: "upload-cloud"
