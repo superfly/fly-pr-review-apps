@@ -123,6 +123,9 @@ steps:
   - name: Deploy redis
     uses: brentd/fly-staging-app@v1
     with:
+      update: false # Don't need to re-deploy redis when the PR is updated
+      path: redis # Keep fly.toml in a subdirectory to avoid confusing flyctl
+      image: flyio/redis:6.2.6
       name: pr-${{ github.event.number }}-myapp-redis
 
   - name: Deploy app
