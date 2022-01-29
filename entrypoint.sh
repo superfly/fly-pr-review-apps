@@ -41,7 +41,7 @@ elif [ "$EVENT_TYPE" = "synchronize" ] && [ "$INPUT_UPDATE" != "false" ]; then
 fi
 
 # Output the app URL to make it available to the GitHub workflow.
-hostname=$(fly status --app "$app" --json | jq -r .App.Hostname) || true
+hostname=$(fly status --app "$app" --json | jq -r .Hostname) || true
 if [ -n "$hostname" ]; then
   echo "::set-output name=url::https://$hostname"
 fi
