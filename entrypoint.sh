@@ -7,16 +7,22 @@ if [ -n "$INPUT_PATH" ]; then
   cd "$INPUT_PATH" || exit
 fi
 
-# PR_NUMBER=$(echo "$GITHUB_REF" | awk 'BEGIN { FS = "/" } ; { print $3 }')
+PR_NUMBER=$(jq -r .number /github/workflow/event.json)
+REPO_OWNER=$(jq -r .event.base.repo.owner /github/workflow/event.json)
+REPO_NAME=$(jq -r .event.base.repo.name /github/workflow/event.json)
 EVENT_TYPE=$(jq -r .action /github/workflow/event.json)
 
-app="$INPUT_NAME" # TODO: default this to something based on repo+PR_NUMBER
+# Default the Fly app name to pr-{number}-{repo_owner}-{repo_name}
+app="${INPUT_NAME:-pr-$PR_NUMBER-$REPO_OWNER-$REPO_NAME}"
+
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
 
-# PR was opened or reopened.
-if [ "$EVENT_TYPE" = "opened" ] || [ "$EVENT_TYPE" = "reopened" ]; then
+deployed=$(fly status --app "$app" --json | jq -r .Deployed) || true
+
+# PR was opened or reopened, or the Fly app hasn't been successfully created yet.
+if [ "$deployed" != "true" ] || [ "$EVENT_TYPE" = "opened" ] || [ "$EVENT_TYPE" = "reopened" ]; then
 
   # Create the Fly app.
   flyctl launch --now --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
@@ -26,7 +32,7 @@ if [ "$EVENT_TYPE" = "opened" ] || [ "$EVENT_TYPE" = "reopened" ]; then
     flyctl postgres attach --postgres-app "$INPUT_POSTGRES"
   fi
 
-# New commits were added to the PR, and this is an app we want to deploy.
+# New commits were added to the PR, and this is an app we want to re-deploy when the PR is updated.
 elif [ "$EVENT_TYPE" = "synchronize" ] && [ "$INPUT_UPDATE" != "false" ]; then
 
   # Deploy the Fly app.
@@ -34,11 +40,8 @@ elif [ "$EVENT_TYPE" = "synchronize" ] && [ "$INPUT_UPDATE" != "false" ]; then
 
 fi
 
-# Avoid a prompt from flyctl when a fly.toml is present with a different name.
-cd /tmp
-
 # Output the app URL to make it available to the GitHub workflow.
-hostname=$(fly info --app "$app" --json | jq -r .App.Hostname) || true
+hostname=$(fly status --app "$app" --json | jq -r .App.Hostname) || true
 if [ -n "$hostname" ]; then
   echo "::set-output name=url::https://$hostname"
 fi
