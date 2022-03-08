@@ -1,6 +1,6 @@
-# GitHub Staging Apps on Fly
+# PR Review ApPs on Fly.io
 
-This GitHub action wraps the flyctl CLI tool to automatically deploy pull requests to [fly.io](http://fly.io) as "staging apps" - temporary app environments for testing branch changes.
+This GitHub action wraps the Fly.io CLI to automatically deploy pull requests to [fly.io](http://fly.io) for review. These are useful for testing changes on a branch without having to setup explicit staging environments.
 
 This action will create, deploy, and destroy Fly apps. Just set an Action Secret for `FLY_API_TOKEN`.
 
@@ -134,7 +134,3 @@ steps:
     with:
       name: pr-${{ github.event.number }}-myapp-app
 ```
-
-## Setting Fly app secrets
-
-TODO
