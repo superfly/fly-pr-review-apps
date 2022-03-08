@@ -1,5 +1,5 @@
-name: "Staging apps on fly.io"
-description: "Wraps the flyctl CLI tool to enable managing temporary staging apps per Pull Request on Fly.io"
+name: "PR Review Apps on fly.io"
+description: "Deploy temporary apps from pull requests on Fly.io"
 author: Fly
 branding:
   icon: "upload-cloud"
@@ -17,9 +17,9 @@ inputs:
   org:
     description: Organization to launch the app in (alternatively, set the env FLY_ORG)
   path:
-    description: path to a directory with a pre-existing fly.toml which will be copied
+    description: path to a directory containing a fly.toml to clone
   postgres:
-    description: Optionally attach the app to a pre-existing postgres cluster on Fly
+    description: Optionally attach the app to a pre-existing Postgres cluster on Fly
   update:
     description: Whether new commits to the PR should re-deploy the Fly app
     default: true
