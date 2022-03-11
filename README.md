@@ -19,7 +19,7 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 
 ## Required Secrets
 
-`FLY_API_TOKEN` - **Required**. The token to use for authentication. You can find a token by running `flyctl auth token` or going to your [user settings on fly.io](https://web.fly.io/user/personal_access_tokens).
+`FLY_API_TOKEN` - **Required**. The token to use for authentication. You can find a token by running `flyctl auth token` or going to your [user settings on fly.io](https://fly.io/user/personal_access_tokens).
 
 ## Basic Example
 
