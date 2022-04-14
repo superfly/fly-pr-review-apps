@@ -40,7 +40,7 @@ if ! flyctl status --app "$app"; then
   if [ -n "$INPUT_SECRETS" ]; then
     echo $INPUT_SECRETS | flyctl secrets import --app "$app" --detach
   fi
-  flyctl --now deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
+  flyctl deploy --now --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
 elif [ "$INPUT_UPDATE" != "false" ]; then
   flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
   if [ -n "$INPUT_SECRETS" ]; then
