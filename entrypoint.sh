@@ -36,12 +36,11 @@ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
+  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
   if [ -n "$INPUT_SECRETS" ]; then
-    echo "$INPUT_SECRETS" | flyctl secrets import --app "$app" --verbose
-    flyctl launch --now --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
-  else
-    flyctl launch --now --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
+    echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app" --verbose
   fi
+  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
 elif [ "$INPUT_UPDATE" != "false" ]; then
   flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
 fi
