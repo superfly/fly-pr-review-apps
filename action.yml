@@ -23,3 +23,5 @@ inputs:
   update:
     description: Whether new commits to the PR should re-deploy the Fly app
     default: true
+  secrets:
+    description: Secrets to be set on the app. Values are read as `name=value`
