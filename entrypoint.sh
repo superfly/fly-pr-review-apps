@@ -51,6 +51,14 @@ if [ -n "$INPUT_POSTGRES" ]; then
   fi
 fi
 
+if [ -n "$INPUT_SECRETS" ]; then
+  for secret in $(echo $INPUT_SECRETS | tr ";" "\n") ; do
+    KEY=${secret%%:*}
+    VALUE=${secret#*:}
+    fly secrets set "$KEY"="$VALUE" --app "$app" || true
+  done
+fi
+
 if [ "$INPUT_UPDATE" != "false" ]; then
   flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
 fi
