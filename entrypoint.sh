@@ -60,7 +60,7 @@ if [ -n "$INPUT_SECRETS" ]; then
 fi
 
 if [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
+  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate --remote-only
 fi
 
 
