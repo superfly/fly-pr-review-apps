@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/bash -l
 
 set -ex
 
@@ -53,9 +53,8 @@ fi
 
 if [ -n "$INPUT_SECRETS" ]; then
   for secret in $(echo $INPUT_SECRETS | tr ";" "\n") ; do
-    KEY=${secret%%:*}
-    VALUE=${secret#*:}
-    fly secrets set "$KEY"="$VALUE" --app "$app" || true
+    value="${secret}"
+    fly secrets set "$secret"="${!value}" --app "$app" || true
   done
 fi
 

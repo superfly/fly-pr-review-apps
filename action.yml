@@ -23,3 +23,5 @@ inputs:
   update:
     description: Whether new commits to the PR should re-deploy the Fly app
     default: true
+  secrets:
+    description: "Secrets to pass to the app, separated by semicolons (eg: \"SECRET1;SECRET2\")"
