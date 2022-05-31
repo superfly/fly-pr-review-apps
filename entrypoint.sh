@@ -23,6 +23,7 @@ postgres_app="${INPUT_POSTGRES_NAME:-pr-$PR_NUMBER-$REPO_OWNER-$REPO_NAME-postgr
 region="${INPUT_REGION:-${FLY_REGION:-cdg}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
+postgres_vm_size="${INPUT_POSTGRES_VM_SIZE:-shared-cpu-1x}"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "For safety, this action requires the app's name to contain the PR number."
