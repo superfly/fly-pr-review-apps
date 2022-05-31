@@ -47,20 +47,20 @@ fi
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
   if ! flyctl status --app "$postgres_app"; then
-    flyctl postgres create --name "$postgres_app" --region "$region" --organization "$org" --vm-size shared-cpu-1x --volume-size 1 --initial-cluster-size 1 || true
+    flyctl postgres create --name "$postgres_app" --region "$region" --organization "$org" --vm-size "$postgres_vm_size" --volume-size 1 --initial-cluster-size 1 || true
     flyctl postgres attach --app "$app" --postgres-app "$postgres_app" || true
   fi
 fi
 
 if [ -n "$INPUT_SECRETS" ]; then
-  for secret in $(echo $INPUT_SECRETS | tr ";" "\n") ; do
+  bash -c "fly secrets --app $app set $(for secret in $(echo $INPUT_SECRETS | tr ";" "\n") ; do
     value="${secret}"
-    fly secrets set "$secret"="${!value}" --app "$app" || true
-  done
+    echo "$secret='${!value}'"
+  done)" || true
 fi
 
 if [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate --remote-only
+  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
 fi
 
 
