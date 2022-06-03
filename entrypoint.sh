@@ -55,7 +55,7 @@ fi
 if [ -n "$INPUT_SECRETS" ]; then
   bash -c "fly secrets --app $app set $(for secret in $(echo $INPUT_SECRETS | tr ";" "\n") ; do
     value="${secret}"
-    echo "$secret='${!value}'"
+    echo -n " $secret='${!value}' "
   done)" || true
 fi
 
