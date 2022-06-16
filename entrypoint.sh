@@ -22,6 +22,7 @@ app="${INPUT_NAME:-pr-$PR_NUMBER-$REPO_OWNER-$REPO_NAME}"
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
+config="$INPUT_CONFIG"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "For safety, this action requires the app's name to contain the PR number."
@@ -38,7 +39,7 @@ fi
 if ! flyctl status --app "$app"; then
   flyctl launch --now --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
 elif [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
+  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
 fi
 
 # Attach postgres cluster to the app if specified.
