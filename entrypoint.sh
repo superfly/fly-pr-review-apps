@@ -47,7 +47,7 @@ if [ -n "$INPUT_POSTGRES" ]; then
 fi
 
 # Make some info available to the GitHub workflow.
-fly status --app "$app" --json >status.json
+flyctl status --app "$app" --json >status.json
 hostname=$(jq -r .Hostname status.json)
 appid=$(jq -r .ID status.json)
 echo "::set-output name=hostname::$hostname"
