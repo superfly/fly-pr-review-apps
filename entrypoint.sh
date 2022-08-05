@@ -38,7 +38,7 @@ fi
 if ! flyctl status --app "$app"; then
   flyctl launch --now --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
 elif [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
+  flyctl deploy --app "$app" --image "$image" --region "$region" --strategy immediate
 fi
 
 # Attach postgres cluster to the app if specified.
