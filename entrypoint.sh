@@ -43,7 +43,7 @@ if ! flyctl status --app "$app"; then
   if [ -n "$INPUT_SECRETS" ]; then
     echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
   fi
-  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
+  flyctl deploy --config "$config" --dockerfile "$dockerfile" --app "$app" --region "$region" --image "$image" --strategy immediate
 elif [ "$INPUT_UPDATE" != "false" ]; then
   flyctl deploy --config "$config" --dockerfile "$dockerfile" --app "$app" --region "$region" --image "$image" --strategy immediate
 fi
