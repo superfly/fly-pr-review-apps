@@ -54,6 +54,6 @@ fi
 fly status --app "$app" --json >status.json
 hostname=$(jq -r .Hostname status.json)
 appid=$(jq -r .ID status.json)
-echo "::set-output name=hostname::$hostname"
-echo "::set-output name=url::https://$hostname"
-echo "::set-output name=id::$appid"
+echo "hostname=$hostname" >> $GITHUB_OUTPUT
+echo "url=https://$hostname" >> $GITHUB_OUTPUT
+echo "id=$appid" >> $GITHUB_OUTPUT
