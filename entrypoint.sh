@@ -36,6 +36,7 @@ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
+  echo "Contents of config $config file: " && cat "$config"
   flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
 fi
 if [ -n "$INPUT_SECRETS" ]; then
