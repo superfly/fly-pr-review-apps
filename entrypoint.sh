@@ -36,12 +36,15 @@ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
-  echo "Contents of config $config file: " && cat "$config"
+  # Backup the original config file since 'flyctl launch' messes up the [build.args] section
+  cp "$config" "$config.bak"
   flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
 fi
 if [ -n "$INPUT_SECRETS" ]; then
   echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
 fi
+# Restore the original config prior to deploy
+cp "$config.bak" "$config"
 echo "Contents of config $config file: " && cat "$config"
 flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
 
@@ -51,7 +54,7 @@ if [ -n "$INPUT_POSTGRES" ]; then
 fi
 
 # Make some info available to the GitHub workflow.
-fly status --app "$app" --json >status.json
+flyctl status --app "$app" --json >status.json
 hostname=$(jq -r .Hostname status.json)
 appid=$(jq -r .ID status.json)
 echo "hostname=$hostname" >> $GITHUB_OUTPUT
