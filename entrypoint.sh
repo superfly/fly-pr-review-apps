@@ -21,7 +21,7 @@ app="${INPUT_NAME:-pr-$PR_NUMBER-$REPO_NAME}"
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
-config="$INPUT_CONFIG"
+config="${INPUT_CONFIG:-fly.toml}"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "For safety, this action requires the app's name to contain the PR number."
@@ -36,19 +36,13 @@ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
-  echo "Contents of fly.toml file: " && cat fly.toml
   flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
-  if [ -n "$INPUT_SECRETS" ]; then
-    echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
-  fi
-  flyctl deploy --app "$app" --region "$region" --image "$image" --strategy immediate
-elif [ "$INPUT_UPDATE" != "false" ]; then
-  if [ -n "$INPUT_SECRETS" ]; then
-    echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
-  fi
-  echo "Contents of fly.toml file: " && cat fly.toml
-  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
 fi
+if [ -n "$INPUT_SECRETS" ]; then
+  echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
+fi
+echo "Contents of config $config file: " && cat "$config"
+flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
 
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
