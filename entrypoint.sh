@@ -36,6 +36,7 @@ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
+  echo "Contents of fly.toml file: " && cat fly.toml
   flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
   if [ -n "$INPUT_SECRETS" ]; then
     echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
@@ -45,6 +46,7 @@ elif [ "$INPUT_UPDATE" != "false" ]; then
   if [ -n "$INPUT_SECRETS" ]; then
     echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
   fi
+  echo "Contents of fly.toml file: " && cat fly.toml
   flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
 fi
 
