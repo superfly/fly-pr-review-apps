@@ -39,12 +39,13 @@ if ! flyctl status --app "$app"; then
   # Backup the original config file since 'flyctl launch' messes up the [build.args] section
   cp "$config" "$config.bak"
   flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
+  # Restore the original config file
+  cp "$config.bak" "$config"
 fi
 if [ -n "$INPUT_SECRETS" ]; then
   echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
 fi
-# Restore the original config prior to deploy
-cp "$config.bak" "$config"
+
 echo "Contents of config $config file: " && cat "$config"
 flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
 
