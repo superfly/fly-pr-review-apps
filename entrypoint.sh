@@ -47,8 +47,12 @@ if ! flyctl status --app "$app"; then
   # Do not copy config if it was passed
   if [ -n "$INPUT_CONFIG" ]; then
     flyctl launch --no-deploy --dockerignore-from-gitignore --name "$app" --image "$image" --region "$region" --org "$org"
+    # Cleanup generated fly.toml
+    rm fly.toml
   else
     flyctl launch --no-deploy --copy-config --dockerignore-from-gitignore --name "$app" --image "$image" --region "$region" --org "$org"
+    # Cleanup generated fly.toml
+    rm fly.toml
   fi
 
   if [ -n "$INPUT_SECRETS" ]; then
