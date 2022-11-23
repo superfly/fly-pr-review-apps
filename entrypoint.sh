@@ -47,13 +47,7 @@ if [ -n "$INPUT_SECRETS" ]; then
 fi
 
 echo "Contents of config $config file: " && cat "$config"
-if [ -n "$INPUT_BUILD_SECRET" ]; then
-  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate --build-secret "$INPUT_BUILD_SECRET"
-else
-  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
-fi
-
-
+flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
 
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then

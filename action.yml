@@ -27,5 +27,3 @@ inputs:
     default: true
   secrets:
     description: Secrets to be set on the app. Separate multiple secrets with a space
-  build_secret:
-    description: Additional build secret for Fly deploy command. See - https://fly.io/docs/reference/build-secrets/
