@@ -47,7 +47,8 @@ if [ -n "$INPUT_SECRETS" ]; then
 fi
 
 echo "Contents of config $config file: " && cat "$config"
-flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate "$INPUT_EXTRA_DEPLOY_ARGS"
+deploy_cmd="flyctl deploy --config $config --app $app --region $region --image $image --strategy immediate $INPUT_EXTRA_DEPLOY_ARGS"
+eval $deploy_cmd
 
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
