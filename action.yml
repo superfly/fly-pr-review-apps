@@ -27,3 +27,5 @@ inputs:
     default: true
   secrets:
     description: Secrets to be set on the app. Separate multiple secrets with a space
+  extra-deploy-args:
+    description: Additional args for Fly deploy command
