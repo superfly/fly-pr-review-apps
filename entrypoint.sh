@@ -54,6 +54,17 @@ if [ -n "$INPUT_POSTGRES" ]; then
   flyctl postgres attach --postgres-app "$INPUT_POSTGRES" || true
 fi
 
+# Scale the VM
+if [ -n "$INPUT_VM" ]; then
+  flyctl scale --app "$app" vm "$INPUT_VM"
+fi
+if [ -n "$INPUT_MEMORY" ]; then
+  flyctl scale --app "$app" memory "$INPUT_MEMORY"
+fi
+if [ -n "$INPUT_COUNT" ]; then
+  flyctl scale --app "$app" count "$INPUT_COUNT"
+fi
+
 # Make some info available to the GitHub workflow.
 flyctl status --app "$app" --json >status.json
 hostname=$(jq -r .Hostname status.json)
@@ -61,3 +72,4 @@ appid=$(jq -r .ID status.json)
 echo "hostname=$hostname" >> $GITHUB_OUTPUT
 echo "url=https://$hostname" >> $GITHUB_OUTPUT
 echo "id=$appid" >> $GITHUB_OUTPUT
+echo "name=$app" >> $GITHUB_OUTPUT
