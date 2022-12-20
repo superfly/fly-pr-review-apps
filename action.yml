@@ -26,7 +26,7 @@ inputs:
     description: Optionally attach the app to a pre-existing Postgres cluster on Fly
   update:
     description: Whether new commits to the PR should re-deploy the Fly app
-    default: "true"
+    default: true
   secrets:
     description: Secrets to be set on the app. Separate multiple secrets with a space
   build_arg:
