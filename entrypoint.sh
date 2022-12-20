@@ -64,9 +64,9 @@ if ! flyctl status --app "$app"; then
     flyctl postgres attach --app "$app" "$INPUT_POSTGRES" || true
   fi
 
-  flyctl deploy --config "$config" --dockerfile "$dockerfile" --app "$app" --region "$region" --image "$image" --strategy immediate
+  flyctl deploy --config "$config" --dockerfile "$dockerfile" --build-arg "$build_arg" --app "$app" --region "$region" --image "$image" --strategy immediate
 elif [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --config "$config" --dockerfile "$dockerfile" --app "$app" --region "$region" --image "$image" --strategy immediate
+  flyctl deploy --config "$config" --dockerfile "$dockerfile" --build-arg "$build_arg" --app "$app" --region "$region" --image "$image" --strategy immediate
 fi
 
 # Make some info available to the GitHub workflow.
