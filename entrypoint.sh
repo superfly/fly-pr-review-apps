@@ -24,6 +24,7 @@ org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
 config="$INPUT_CONFIG"
 dockerfile="$INPUT_DOCKERFILE"
+build_arg="$INPUT_BUILD_ARG"
 
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
