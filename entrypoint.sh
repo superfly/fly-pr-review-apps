@@ -57,14 +57,14 @@ if [ -n "$INPUT_COUNT" ]; then
   flyctl scale --app "$app" count "$INPUT_COUNT"
 fi
 
-# Trigger the deploy of the new version.
-echo "Contents of config $config file: " && cat "$config"
-flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
-
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
   flyctl postgres attach --postgres-app "$INPUT_POSTGRES" || true
 fi
+
+# Trigger the deploy of the new version.
+echo "Contents of config $config file: " && cat "$config"
+flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
 
 # Make some info available to the GitHub workflow.
 flyctl status --app "$app" --json >status.json
