@@ -46,6 +46,9 @@ if ! flyctl status --app "$app"; then
   # Launch new app
   flyctl launch --no-deploy --copy-config --name "$app" --region "$region" --org "$org" --remote-only
 
+  # Add app host to env secrets
+  flyctl secrets set --app "$app" PHX_HOST="$app".fly.dev
+
   if [ -n "$INPUT_POSTGRES" ]; then
     # Attach app to postgres database
     flyctl postgres attach --app "$app" "$INPUT_POSTGRES" || true
