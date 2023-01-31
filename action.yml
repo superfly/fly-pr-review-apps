@@ -26,4 +26,10 @@ inputs:
     description: Whether new commits to the PR should re-deploy the Fly app
     default: true
   secrets:
-    description: Secrets to be set on the app. Separate multiple secrets with a space, i.e., `FIRST_SECRET=${{ secrets.FIRST_SECRET }} SECOND_SECRET=${{ secrets.SECOND_SECRET }}`
+    description: Secrets to be set on the app. Separate multiple secrets with a space
+  vm:
+    description: Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. (defaults to shared-cpu-1x)
+  memory:
+    description: Set app VM memory (defaults to 256 megabytes)
+  count:
+    description: Set app VM count to the given value (defaults to 1)
