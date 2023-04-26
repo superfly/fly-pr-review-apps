@@ -22,6 +22,7 @@ region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
 config="${INPUT_CONFIG:-fly.toml}"
+database="${INPUT_DATABASE:-$app}"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "For safety, this action requires the app's name to contain the PR number."
@@ -50,8 +51,8 @@ if ! flyctl status --app "$app"; then
   flyctl secrets set --app "$app" PHX_HOST="$app".fly.dev
 
   if [ -n "$INPUT_POSTGRES" ]; then
-    # Attach app to postgres database
-    flyctl postgres attach --app "$app" "$INPUT_POSTGRES" || true
+    # Attach app to postgres cluster and database.
+    flyctl postgres attach --app "$app" "$INPUT_POSTGRES" --database-name "$database" || true
   fi
 
   # Restore the original config file
