@@ -52,7 +52,7 @@ if ! flyctl status --app "$app"; then
 
   if [ -n "$INPUT_POSTGRES" ]; then
     # Attach app to postgres cluster and database.
-    flyctl postgres attach --app "$app" "$INPUT_POSTGRES" --database-name "$database" || true
+    flyctl postgres attach --app "$app" "$INPUT_POSTGRES" --database-name "$database" --yes || true
   fi
 
   # Restore the original config file
