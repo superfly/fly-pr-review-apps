@@ -46,17 +46,6 @@ if [ -n "$INPUT_SECRETS" ]; then
   echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
 fi
 
-# Scale the VM before the deploy.
-if [ -n "$INPUT_VM" ]; then
-  flyctl scale --app "$app" vm "$INPUT_VM"
-fi
-if [ -n "$INPUT_MEMORY" ]; then
-  flyctl scale --app "$app" memory "$INPUT_MEMORY"
-fi
-if [ -n "$INPUT_COUNT" ]; then
-  flyctl scale --app "$app" count "$INPUT_COUNT"
-fi
-
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
   flyctl postgres attach --postgres-app "$INPUT_POSTGRES" || true
@@ -64,7 +53,7 @@ fi
 
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
-flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate
+flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate --vm-size shared-cpu-2x
 
 # Make some info available to the GitHub workflow.
 flyctl status --app "$app" --json >status.json
