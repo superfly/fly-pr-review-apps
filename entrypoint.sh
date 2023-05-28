@@ -45,7 +45,7 @@ if ! flyctl status --app "$app"; then
   mix local.hex --force
 
   # Launch new app
-  flyctl launch --no-deploy --copy-config --name "$app" --region "$region" --org "$org" --remote-only
+  flyctl launch --no-deploy --copy-config --name "$app" --region "$region" --org "$org" --remote-only --ha=false
 
   # Add app host to env secrets
   flyctl secrets set --app "$app" PHX_HOST="$app".fly.dev
