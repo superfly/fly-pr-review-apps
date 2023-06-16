@@ -35,29 +35,47 @@ if [ "$EVENT_TYPE" = "closed" ]; then
   exit 0
 fi
 
+# Backup the original config file since 'flyctl launch' messes up the [build.args] section
+cp "$config" "$config.bak"
+
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
-  # Backup the original config file since 'flyctl launch' messes up the [build.args] section
-  cp "$config" "$config.bak"
-
   # Install elixir
   apk add elixir
+  apk add inotify-tools
   mix local.hex --force
+  mix local.rebar --force
 
   # Launch new app
-  flyctl launch --no-deploy --copy-config --name "$app" --region "$region" --org "$org" --remote-only --ha=false
+  flyctl launch --no-deploy --copy-config --name "$app" --region "$region" --org "$org" --remote-only --ha=false || true
+fi
 
+# Get list of secrets
+secrets=$(flyctl secrets -a "$app" list)
+
+if ! echo "$secrets_output" | grep -q "PHX_HOST"; then
   # Add app host to env secrets
   flyctl secrets set --app "$app" PHX_HOST="$app".fly.dev
+fi
 
+if ! echo "$secrets" | grep -q "DATABASE_URL"; then
   if [ -n "$INPUT_POSTGRES" ]; then
+    # Replace - with _ in app name to get postgres user name
+    postgres_user="${app//-/_}"
+
+    # Execute DROP USER command using flyctl postgres connect
+    eval "flyctl postgres connect -a "$INPUT_POSTGRES" <<EOF
+    DROP USER $postgres_user;
+    \q
+    EOF"
+
     # Attach app to postgres cluster and database.
     flyctl postgres attach --app "$app" "$INPUT_POSTGRES" --database-name "$database" --yes || true
   fi
-
-  # Restore the original config file
-  cp "$config.bak" "$config"
 fi
+
+# Restore the original config file
+cp "$config.bak" "$config"
 
 if [ -n "$INPUT_SECRETS" ]; then
   echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
