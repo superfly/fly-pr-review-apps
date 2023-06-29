@@ -31,6 +31,19 @@ fi
 
 # PR was closed - remove the Fly app if one exists and exit.
 if [ "$EVENT_TYPE" = "closed" ]; then
+  if [ -n "$INPUT_POSTGRES" ]; then
+    apk add expect
+
+    # Detach app from postgres cluster and database.
+    expect -c "
+      spawn flyctl postgres detach "$INPUT_POSTGRES" --app "$app"
+      expect {Select the attachment that you would like to detach*}
+      send -- \"\r\"
+      expect eof
+    "
+  fi
+
+  # Destroy the Fly app
   flyctl apps destroy "$app" -y || true
   exit 0
 fi
