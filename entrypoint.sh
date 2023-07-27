@@ -25,7 +25,7 @@ image="$INPUT_IMAGE"
 config="$INPUT_CONFIG"
 dockerfile="$INPUT_DOCKERFILE"
 build_arg="$INPUT_BUILD_ARG"
-vm_size="${INPUT_VM_SIZE:-${FLY_VM_SIZE:-256}}"
+vm_size="${INPUT_VM_SIZE:-${FLY_VM_SIZE:-shared-cpu-1x}}"
 
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
