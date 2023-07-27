@@ -48,11 +48,11 @@ fi
 if ! flyctl status --app "$app"; then
   # Do not copy config if it was passed
   if [ -n "$INPUT_CONFIG" ]; then
-    flyctl launch --no-deploy --dockerignore-from-gitignore --name "$app" --image "$image" --region "$region" --org "$org" --vm_size "$vm_size"
+    flyctl launch --no-deploy --dockerignore-from-gitignore --name "$app" --image "$image" --region "$region" --org "$org" --vm-size "$vm_size"
     # Cleanup generated fly.toml
     rm fly.toml
   else
-    flyctl launch --no-deploy --copy-config --dockerignore-from-gitignore --name "$app" --image "$image" --region "$region" --org "$org" --vm_size "$vm_size"
+    flyctl launch --no-deploy --copy-config --dockerignore-from-gitignore --name "$app" --image "$image" --region "$region" --org "$org" --vm-size "$vm_size"
     # Cleanup generated fly.toml
     rm fly.toml
   fi
@@ -66,9 +66,9 @@ if ! flyctl status --app "$app"; then
     flyctl postgres attach --app "$app" "$INPUT_POSTGRES" || true
   fi
 
-  flyctl deploy --config "$config" --dockerfile "$dockerfile" $build_arg --app "$app" --region "$region" --image "$image" --vm_size "$vm_size" --strategy immediate 
+  flyctl deploy --config "$config" --dockerfile "$dockerfile" $build_arg --app "$app" --region "$region" --image "$image" --vm-size "$vm_size" --strategy immediate 
 elif [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --config "$config" --dockerfile "$dockerfile" $build_arg --app "$app" --region "$region" --image "$image" --vm_size "$vm_size" --strategy immediate 
+  flyctl deploy --config "$config" --dockerfile "$dockerfile" $build_arg --app "$app" --region "$region" --image "$image" --vm-size "$vm_size" --strategy immediate 
 fi
 
 # Make some info available to the GitHub workflow.
