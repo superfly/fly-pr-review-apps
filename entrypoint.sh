@@ -26,7 +26,7 @@ config="$INPUT_CONFIG"
 dockerfile="$INPUT_DOCKERFILE"
 build_arg="$INPUT_BUILD_ARG"
 vm_size="${INPUT_VM_SIZE:-${FLY_VM_SIZE:-shared-cpu-1x}}"
-vm_memory="${INPUT_VM_MEMORY:-${FLY_VM_MEMORY:256}}"
+vm_memory="${INPUT_VM_MEMORY:-${FLY_VM_MEMORY:-256}}"
 
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
