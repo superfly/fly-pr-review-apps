@@ -13,16 +13,15 @@ if [ -z "$PR_NUMBER" ]; then
   exit 1
 fi
 
-REPO_OWNER=$(jq -r .event.base.repo.owner /github/workflow/event.json)
-REPO_NAME=$(jq -r .event.base.repo.name /github/workflow/event.json)
+REPO_NAME=$(echo $GITHUB_REPOSITORY | tr "/" "-")
 EVENT_TYPE=$(jq -r .action /github/workflow/event.json)
 
 # Default the Fly app name to pr-{number}-{repo_owner}-{repo_name}
-app="${INPUT_NAME:-pr-$PR_NUMBER-$REPO_OWNER-$REPO_NAME}"
+app="${INPUT_NAME:-pr-$PR_NUMBER-$REPO_NAME}"
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
-config="$INPUT_CONFIG"
+config="${INPUT_CONFIG:-fly.toml}"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "For safety, this action requires the app's name to contain the PR number."
@@ -35,26 +34,28 @@ if [ "$EVENT_TYPE" = "closed" ]; then
   exit 0
 fi
 
-# Deploy the Fly app, creating it first if needed.
+# Create the app if not present
 if ! flyctl status --app "$app"; then
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
-  if [ -n "$INPUT_SECRETS" ]; then
-    echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
-  fi
-  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
-elif [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
+  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" --remote-only
+fi
+
+if [ -n "$INPUT_SECRETS" ]; then
+  echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
 fi
 
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
-  flyctl postgres attach --postgres-app "$INPUT_POSTGRES" || true
+  flyctl postgres attach "$INPUT_POSTGRES" --yes || true
 fi
+
+# Deploy the app
+flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --vm-memory "$INPUT_MEMORY" --remote-only --ha=false --strategy immediate
 
 # Make some info available to the GitHub workflow.
 fly status --app "$app" --json >status.json
 hostname=$(jq -r .Hostname status.json)
 appid=$(jq -r .ID status.json)
-echo "::set-output name=hostname::$hostname"
-echo "::set-output name=url::https://$hostname"
-echo "::set-output name=id::$appid"
+echo "hostname=$hostname" >> $GITHUB_OUTPUT
+echo "url=https://$hostname" >> $GITHUB_OUTPUT
+echo "id=$appid" >> $GITHUB_OUTPUT
+echo "name=$app" >> $GITHUB_OUTPUT
