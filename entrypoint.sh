@@ -27,6 +27,7 @@ dockerfile="$INPUT_DOCKERFILE"
 build_arg="$INPUT_BUILD_ARG"
 vm_size="${INPUT_VM_SIZE:-${FLY_VM_SIZE:-shared-cpu-1x}}"
 vm_memory="${INPUT_VM_MEMORY:-${FLY_VM_MEMORY:-256}}"
+wait_timeout="${INPUT_WAIT_TIMEOUT:-120}"
 
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
@@ -67,9 +68,9 @@ if ! flyctl status --app "$app"; then
     flyctl postgres attach --app "$app" "$INPUT_POSTGRES" || true
   fi
 
-  flyctl deploy --config "$config" --dockerfile "$dockerfile" $build_arg --app "$app" --region "$region" --image "$image" --vm-size "$vm_size" --vm-memory "$vm_memory" --strategy immediate 
+  flyctl deploy --config "$config" --dockerfile "$dockerfile" $build_arg --app "$app" --region "$region" --image "$image" --vm-size "$vm_size" --vm-memory "$vm_memory" --strategy immediate --wait-timeout "$wait_timeout"
 elif [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --config "$config" --dockerfile "$dockerfile" $build_arg --app "$app" --region "$region" --image "$image" --vm-size "$vm_size" --vm-memory "$vm_memory" --strategy immediate 
+  flyctl deploy --config "$config" --dockerfile "$dockerfile" $build_arg --app "$app" --region "$region" --image "$image" --vm-size "$vm_size" --vm-memory "$vm_memory" --strategy immediate --wait-timeout "$wait_timeout"
 fi
 
 # Make some info available to the GitHub workflow.
