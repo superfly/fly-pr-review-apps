@@ -10,6 +10,8 @@ RUN apk --no-cache add git
 
 RUN which git
 
+RUN apk --no-cache --update add build-base
+
 COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
