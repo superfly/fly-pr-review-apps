@@ -78,6 +78,9 @@ if ! echo "$secrets" | grep -q "DATABASE_URL"; then
 
     # Execute DROP USER command using flyctl postgres connect
     eval "flyctl postgres connect -a "$INPUT_POSTGRES" <<EOF
+    \c $database;
+    REASSIGN OWNED BY $postgres_user TO postgres;
+    DROP OWNED BY $postgres_user;
     DROP USER $postgres_user;
     \q
     EOF"
