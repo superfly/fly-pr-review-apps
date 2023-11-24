@@ -24,12 +24,12 @@ inputs:
     description: Optionally attach the app to a pre-existing Postgres cluster on Fly
   secrets:
     description: Secrets to be set on the app. Separate multiple secrets with a space
-  vm-size:
-    description: Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu-kind, and memory inputs.
+  vmsize:
+    description: Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.
   cpu:
     description: Set app VM CPU (defaults to 1 cpu)
     default: 1
-  cpu-kind:
+  cpukind:
     description: Set app VM CPU kind - shared or performance. (defaults to shared)
     default: shared
   memory:
