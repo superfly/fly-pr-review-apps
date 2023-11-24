@@ -53,7 +53,11 @@ fi
 
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
-flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate --vm-size shared-cpu-2x --ha=false
+if [ -n "$INPUT_VM" ]; then
+  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-size "$INPUT_VM-SIZE"
+else
+  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-cpu-kind "$INPUT_CPU-KIND" --vm-cpus $INPUT_CPUS --vm-memory "$INPUT_MEMORY"
+fi
 
 # Make some info available to the GitHub workflow.
 flyctl status --app "$app" --json >status.json
