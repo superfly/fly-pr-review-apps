@@ -38,4 +38,3 @@ inputs:
   ha:
     description: Create spare machines that increases app availability (default false)
     default: false
-

@@ -13,11 +13,13 @@ if [ -z "$PR_NUMBER" ]; then
   exit 1
 fi
 
-REPO_NAME=$(echo $GITHUB_REPOSITORY | tr "/" "-")
+GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
 EVENT_TYPE=$(jq -r .action /github/workflow/event.json)
 
-# Default the Fly app name to pr-{number}-{repo_name}
-app="${INPUT_NAME:-pr-$PR_NUMBER-$REPO_NAME}"
+# Default the Fly app name to pr-{number}-{repo_owner}-{repo_name}
+app="${INPUT_NAME:-pr-$PR_NUMBER-$GITHUB_REPOSITORY_OWNER-$GITHUB_REPOSITORY_NAME}"
+# Change underscores to hyphens.
+app="${app//_/-}"
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
@@ -48,7 +50,7 @@ fi
 
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
-  flyctl postgres attach --postgres-app "$INPUT_POSTGRES" || true
+  flyctl postgres attach "$INPUT_POSTGRES" || true
 fi
 
 # Trigger the deploy of the new version.
