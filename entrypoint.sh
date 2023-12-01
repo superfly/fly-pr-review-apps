@@ -38,13 +38,14 @@ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
+  # Backup the original config file since 'flyctl launch' messes up the [build.args] section
+  cp "$config" "$config.bak"
   flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
-  if [ -n "$INPUT_SECRETS" ]; then
-    echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
-  fi
-  flyctl deploy --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
-elif [ "$INPUT_UPDATE" != "false" ]; then
-  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --region "$region" --strategy immediate
+  # Restore the original config file
+  cp "$config.bak" "$config"
+fi
+if [ -n "$INPUT_SECRETS" ]; then
+  echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
 fi
 
 # Attach postgres cluster to the app if specified.
@@ -52,10 +53,19 @@ if [ -n "$INPUT_POSTGRES" ]; then
   flyctl postgres attach "$INPUT_POSTGRES" || true
 fi
 
+# Trigger the deploy of the new version.
+echo "Contents of config $config file: " && cat "$config"
+if [ -n "$INPUT_VM" ]; then
+  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-size "$INPUT_VMSIZE"
+else
+  flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus $INPUT_CPU --vm-memory "$INPUT_MEMORY"
+fi
+
 # Make some info available to the GitHub workflow.
-fly status --app "$app" --json >status.json
+flyctl status --app "$app" --json >status.json
 hostname=$(jq -r .Hostname status.json)
 appid=$(jq -r .ID status.json)
 echo "hostname=$hostname" >> $GITHUB_OUTPUT
 echo "url=https://$hostname" >> $GITHUB_OUTPUT
 echo "id=$appid" >> $GITHUB_OUTPUT
+echo "name=$app" >> $GITHUB_OUTPUT
