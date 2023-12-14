@@ -57,7 +57,7 @@ jobs:
       url: ${{ steps.deploy.outputs.url }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Deploy
         id: deploy
@@ -85,7 +85,7 @@ jobs:
       url: ${{ steps.deploy.outputs.url }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Deploy app
         id: deploy
@@ -109,7 +109,7 @@ For production apps, it's a good idea to create a new Postgres cluster specifica
 ```yaml
 # ...
 steps:
-  - uses: actions/checkout@v2
+  - uses: actions/checkout@v4
 
   - name: Deploy app
     id: deploy
@@ -126,7 +126,7 @@ Redis example:
 
 ```yaml
 steps:
-  - uses: actions/checkout@v2
+  - uses: actions/checkout@v4
 
   - name: Deploy redis
     uses: superfly/fly-pr-review-apps@1.0.0
