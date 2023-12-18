@@ -62,10 +62,12 @@ else
 fi
 
 # Make some info available to the GitHub workflow.
-flyctl status --app "$app" --json >status.json
-hostname=$(jq -r .Hostname status.json)
-appid=$(jq -r .ID status.json)
-echo "hostname=$hostname" >> $GITHUB_OUTPUT
-echo "url=https://$hostname" >> $GITHUB_OUTPUT
-echo "id=$appid" >> $GITHUB_OUTPUT
-echo "name=$app" >> $GITHUB_OUTPUT
+if ! [ "$EVENT_TYPE" = "closed" ]; then
+  flyctl status --app "$app" --json >status.json
+  hostname=$(jq -r .Hostname status.json)
+  appid=$(jq -r .ID status.json)
+  echo "hostname=$hostname" >> $GITHUB_OUTPUT
+  echo "url=https://$hostname" >> $GITHUB_OUTPUT
+  echo "id=$appid" >> $GITHUB_OUTPUT
+  echo "name=$app" >> $GITHUB_OUTPUT
+fi
