@@ -29,6 +29,8 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 
 `FLY_API_TOKEN` - **Required**. The token to use for authentication. You can find a token by running `flyctl auth token` or going to your [user settings on fly.io](https://fly.io/user/personal_access_tokens).
 
+Note: If you have a team or organization account please create an org token, as auth token will not work here and set the value in `FLY_API_TOKEN`. We can create a token by running `fly tokens create org` or by going directly to your fly dashboard and then choose "Tokens" from the bottom left side.
+
 ## Basic Example
 
 ```yaml
@@ -39,8 +41,8 @@ on:
 
 env:
   FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-  FLY_REGION: iad
-  FLY_ORG: personal
+  FLY_REGION: <your region>
+  FLY_ORG: personal OR org name
 
 jobs:
   staging_app:
