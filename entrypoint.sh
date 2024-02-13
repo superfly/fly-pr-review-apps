@@ -56,11 +56,11 @@ if ! flyctl status --app "$app"; then
 
   # Attach postgres cluster and set the DATABASE_URL
   flyctl postgres attach "$postgres_app" --app "$app"
-  flyctl deploy $detach --app "$app" --region "$region" --strategy immediate --remote-only
+  flyctl deploy $detach --app "$app" --region "$region" --strategy rolling --vm-cpus 1 --vm-memory 512 --remote-only
 
   statusmessage="Review app created. It may take a few minutes for the app to deploy."
 elif [ "$EVENT_TYPE" = "synchronize" ]; then
-  flyctl deploy $detach --app "$app" --region "$region" --strategy immediate --remote-only
+  flyctl deploy $detach --app "$app" --region "$region" --strategy rolling --vm-cpus 1 --vm-memory 512 --remote-only
   statusmessage="Review app updated. It may take a few minutes for your changes to be deployed."
 fi
 
