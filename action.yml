@@ -31,6 +31,9 @@ inputs:
   memory:
     description: Set app VM memory in megabytes (defaults to 256 megabytes)
     default: 256
+  dockerfile:
+    description: Path to a Dockerfile, will be used for building the image
+    required: true
   ha:
     description: Create spare machines that increases app availability (default false)
     default: false
