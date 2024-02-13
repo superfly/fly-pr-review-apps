@@ -25,7 +25,6 @@ app="${INPUT_NAME:-$REPO_NAME-pr-$PR_NUMBER}"
 postgres_app="${INPUT_POSTGRES:-$REPO_NAME-pr-$PR_NUMBER-postgres}"
 region="${INPUT_REGION:-${FLY_REGION:-ord}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
-image="$INPUT_IMAGE"
 dockerfile="$INPUT_DOCKERFILE"
 memory="$INPUT_MEMORY"
 
@@ -53,15 +52,15 @@ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --dockerfile "$dockerfile" --region "$region" --org "$org"
+  flyctl launch --no-deploy --copy-config --name "$app" --dockerfile "$dockerfile" --region "$region" --org "$org"
 
   # Attach postgres cluster and set the DATABASE_URL
   flyctl postgres attach "$postgres_app" --app "$app"
-  flyctl deploy $detach --app "$app" --region "$region" --image "$image" --strategy immediate --wait-timeout 240 --vm-memory 512
+  flyctl deploy $detach --app "$app" --region "$region" --strategy immediate --remote-only
 
   statusmessage="Review app created. It may take a few minutes for the app to deploy."
 elif [ "$EVENT_TYPE" = "synchronize" ]; then
-  flyctl deploy $detach --app "$app" --region "$region" --image "$image" --strategy immediate --wait-timeout 240 --vm-memory 512
+  flyctl deploy $detach --app "$app" --region "$region" --strategy immediate --remote-only
   statusmessage="Review app updated. It may take a few minutes for your changes to be deployed."
 fi
 
