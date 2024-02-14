@@ -4,43 +4,38 @@ This GitHub action wraps the Fly.io CLI to automatically deploy pull requests to
 
 This action will create, deploy, and destroy Fly apps. Just set an Action Secret for `FLY_API_TOKEN`.
 
-If you have an existing `fly.toml` in your repo, this action will copy it with a new name when deploying. By default, Fly apps will be named with the scheme `pr-{number}-{repo_org}-{repo_name}`.
+If you have an existing `fly.toml` in your repo, this action will copy it with a new name when deploying. By default, Fly apps will be named with the scheme `{repo_name}-pr-{number}`.
 
 ## Inputs
 
 | name       | description                                                                                                                                                                                              |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`     | The name of the Fly app. Alternatively, set the env `FLY_APP`. For safety, must include the PR number. Example: `myapp-pr-${{ github.event.number }}`. Defaults to `pr-{number}-{repo_org}-{repo_name}`. |
-| `image`    | Optional pre-existing Docker image to use                                                                                                                                                                |
-| `config`   | Optional path to a custom Fly toml config. Config path should be relative to `path` parameter, if specified.                                                                                             |
+| `name`     | The name of the Fly app. Alternatively, set the env `FLY_APP`. For safety, must include the PR number. Example: `myapp-pr-${{ github.event.number }}`. Defaults to `{repo_name}-pr-{number}`. |                           |
 | `region`   | Which Fly region to run the app in. Alternatively, set the env `FLY_REGION`. Defaults to `iad`.                                                                                                          |
 | `org`      | Which Fly organization to launch the app under. Alternatively, set the env `FLY_ORG`. Defaults to `personal`.                                                                                            |
 | `path`     | Path to run the `flyctl` commands from. Useful if you have an existing `fly.toml` in a subdirectory.                                                                                                     |
-| `postgres` | Optional name of an existing Postgres cluster to `flyctl postgres attach` to.                                                                                                                            |
-| `update`   | Whether or not to update this Fly app when the PR is updated. Default `true`.                                                                                                                            |
-| `secrets`  | Secrets to be set on the app. Separate multiple secrets with a space                                                                                                                                     |
-| `vmsize`   | Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.                                                           |
-| `cpu`      | Set app VM CPU (defaults to 1 cpu). Default 1.                                                                                                                                                           |
-| `cpukind`  | Set app VM CPU kind - shared or performance. Default shared.                                                                                                                                             |
-| `memory`   | Set app VM memory in megabytes. Default 256.                                                                                                                                                             |
-| `ha`       | Create spare machines that increases app availability. Default `false`.                                                                                                                                  |
+| `postgres` | Optional name of an existing Postgres cluster to `flyctl postgres attach` to.                                                                                                                            |                                                                                                                                  |                                                                                                                                       |                                                                                                                                                       |
+| `dockerfile`       | Path to a Dockerfile, that will be used for building the image                                                                                                                             |
 
 ## Required Secrets
 
 `FLY_API_TOKEN` - **Required**. The token to use for authentication. You can find a token by running `flyctl auth token` or going to your [user settings on fly.io](https://fly.io/user/personal_access_tokens).
 
+Note: If you have a team or organization account create a org token and set the value in `FLY_API_TOKEN`.
+
 ## Basic Example
 
 ```yaml
-name: Staging App
+name: Preview App
+
 on:
   pull_request:
     types: [opened, reopened, synchronize, closed]
 
 env:
-  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-  FLY_REGION: iad
-  FLY_ORG: personal
+  FLY_API_TOKEN: ${{ secrets.FLY_ORG_TOKEN }}
+  FLY_REGION: <your region>
+  FLY_ORG: <your org>
 
 jobs:
   staging_app:
@@ -59,9 +54,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
       - name: Deploy
         id: deploy
-        uses: superfly/fly-pr-review-apps@1.0.0
+        uses: superfly/fly-pr-review-apps@main
+        with:
+          dockerfile: ./Dockerfile
+
+      - name: Set secrets in Fly
+        if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' }}
+        run: |
+          flyctl secrets set -a yourapp-pr-${{ github.event.number }} \
+          EXAMPLE_SECRET=${{ secrets.EXAMPLE_SECRET }} \
+
+      - name: Update image
+        if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' }}
+        run: flyctl image update -a yourapp-pr-${{ github.event.number }} --skip-health-checks -y
 ```
 
 ## Cleaning up GitHub environments
@@ -115,7 +124,7 @@ steps:
     id: deploy
     uses: superfly/fly-pr-review-apps@1.0.0
     with:
-      postgres: myapp-postgres-staging-apps
+      postgres: <your-existing-preview-db>
 ```
 
 ## Example with multiple Fly apps

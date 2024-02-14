@@ -26,7 +26,6 @@ postgres_app="${INPUT_POSTGRES:-$REPO_NAME-pr-$PR_NUMBER-postgres}"
 region="${INPUT_REGION:-${FLY_REGION:-ord}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 dockerfile="$INPUT_DOCKERFILE"
-memory="$INPUT_MEMORY"
 
 # only wait for the deploy to complete if the user has requested the wait option
 # otherwise detach so the GitHub action doesn't run as long
@@ -46,7 +45,7 @@ if [ "$EVENT_TYPE" = "closed" ]; then
   flyctl apps destroy "$app" -y || true
 
   message="Review app deleted."
-  echo "::set-output name=message::$message"
+  echo "message=$message" >> $GITHUB_OUTPUT
   exit 0
 fi
 
@@ -56,11 +55,11 @@ if ! flyctl status --app "$app"; then
 
   # Attach postgres cluster and set the DATABASE_URL
   flyctl postgres attach "$postgres_app" --app "$app"
-  flyctl deploy $detach --app "$app" --region "$region" --strategy rolling --vm-cpus 1 --vm-memory 512 --remote-only
+  flyctl deploy $detach --app "$app" --region "$region" --strategy immediate --remote-only
 
   statusmessage="Review app created. It may take a few minutes for the app to deploy."
 elif [ "$EVENT_TYPE" = "synchronize" ]; then
-  flyctl deploy $detach --app "$app" --region "$region" --strategy rolling --vm-cpus 1 --vm-memory 512 --remote-only
+  flyctl deploy $detach --app "$app" --region "$region" --strategy immediate --remote-only
   statusmessage="Review app updated. It may take a few minutes for your changes to be deployed."
 fi
 
@@ -69,7 +68,7 @@ flyctl status --app "$app" --json >status.json
 hostname=$(jq -r .Hostname status.json)
 appid=$(jq -r .ID status.json)
 
-echo "::set-output name=hostname::$hostname"
-echo "::set-output name=url::https://$hostname"
-echo "::set-output name=id::$appid"
-echo "::set-output name=message::$statusmessage https://$hostname"
+echo "hostname=$hostname" >> $GITHUB_OUTPUT
+echo "url=https://$hostname" >> $GITHUB_OUTPUT
+echo "id=$appid" >> $GITHUB_OUTPUT
+echo "name=$app" >> $GITHUB_OUTPUT
