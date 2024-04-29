@@ -38,3 +38,6 @@ inputs:
   ha:
     description: Create spare machines that increases app availability (default false)
     default: false
+  dockerfile:
+    description: Path to a Dockerfile, will be used for building the image
+    required: true

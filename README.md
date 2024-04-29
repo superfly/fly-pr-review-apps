@@ -24,6 +24,7 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 | `cpukind`  | Set app VM CPU kind - shared or performance. Default shared.                                                                                                                                             |
 | `memory`   | Set app VM memory in megabytes. Default 256.                                                                                                                                                             |
 | `ha`       | Create spare machines that increases app availability. Default `false`.                                                                                                                                  |
+| `dockerfile`       | Path to a Dockerfile, that will be used for building the image                                     |
 
 ## Required Secrets
 
@@ -90,6 +91,8 @@ jobs:
       - name: Deploy app
         id: deploy
         uses: superfly/fly-pr-review-apps@1.0.0
+        with:
+         dockerfile: "./Dockerfile"
 
       - name: Clean up GitHub environment
         uses: strumwolf/delete-deployment-environment@v2
