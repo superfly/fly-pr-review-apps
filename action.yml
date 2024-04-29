@@ -10,6 +10,10 @@ runs:
 inputs:
   name:
     description: Fly app name
+  image:
+    description: Optional pre-existing Docker image to use
+  config:
+    description: Optional path to a custom Fly toml config. Config path should be relative to `path` parameter, if specified.
   region:
     description: Region to launch the app in (alternatively, set the env FLY_REGION)
   org:
@@ -18,6 +22,19 @@ inputs:
     description: path to a directory containing a fly.toml to clone
   postgres:
     description: Optionally attach the app to a pre-existing Postgres cluster on Fly
-  dockerfile:
-    description: Path to a Dockerfile, will be used for building the image
-    required: true
+  secrets:
+    description: Secrets to be set on the app. Separate multiple secrets with a space
+  vmsize:
+    description: Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.
+  cpu:
+    description: Set app VM CPU (defaults to 1 cpu)
+    default: 1
+  cpukind:
+    description: Set app VM CPU kind - shared or performance. (defaults to shared)
+    default: shared
+  memory:
+    description: Set app VM memory in megabytes (defaults to 256 megabytes)
+    default: 256
+  ha:
+    description: Create spare machines that increases app availability (default false)
+    default: false
