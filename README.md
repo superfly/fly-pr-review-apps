@@ -62,6 +62,10 @@ jobs:
       - name: Deploy
         id: deploy
         uses: superfly/fly-pr-review-apps@1.0.0
+
+      - name: Update docker image
+        if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' }}
+        run: flyctl image update -a pr-${{ github.event.number }}-myapp-app --skip-health-checks -y
 ```
 
 ## Cleaning up GitHub environments
