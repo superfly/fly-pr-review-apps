@@ -18,7 +18,9 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 | `path`     | Path to run the `flyctl` commands from. Useful if you have an existing `fly.toml` in a subdirectory.                                                                                                     |
 | `postgres` | Optional name of an existing Postgres cluster to `flyctl postgres attach` to.                                                                                                                            |
 | `update`   | Whether or not to update this Fly app when the PR is updated. Default `true`.                                                                                                                            |
-| `secrets`  | Secrets to be set on the app. Separate multiple secrets with a space                                                                                                                                     |
+| `secrets`  | Secrets to be set on the app at runtime. Separate multiple secrets with a space                                                                                                                                     |
+| `build_args` | Optional Docker --build-arg |
+| `build_secrets` | Optional Docker --build-secret |
 | `vmsize`   | Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.                                                           |
 | `cpu`      | Set app VM CPU (defaults to 1 cpu). Default 1.                                                                                                                                                           |
 | `cpukind`  | Set app VM CPU kind - shared or performance. Default shared.                                                                                                                                             |
@@ -61,7 +63,7 @@ jobs:
 
       - name: Deploy
         id: deploy
-        uses: superfly/fly-pr-review-apps@1.0.0
+        uses: superfly/fly-pr-review-apps@1.3.0
 ```
 
 ## Cleaning up GitHub environments
@@ -89,7 +91,7 @@ jobs:
 
       - name: Deploy app
         id: deploy
-        uses: superfly/fly-pr-review-apps@1.0.0
+        uses: superfly/fly-pr-review-apps@1.3.0
 
       - name: Clean up GitHub environment
         uses: strumwolf/delete-deployment-environment@v2
@@ -113,7 +115,7 @@ steps:
 
   - name: Deploy app
     id: deploy
-    uses: superfly/fly-pr-review-apps@1.0.0
+    uses: superfly/fly-pr-review-apps@1.3.0
     with:
       postgres: myapp-postgres-staging-apps
 ```
@@ -129,7 +131,7 @@ steps:
   - uses: actions/checkout@v4
 
   - name: Deploy redis
-    uses: superfly/fly-pr-review-apps@1.0.0
+    uses: superfly/fly-pr-review-apps@1.3.0
     with:
       update: false # Don't need to re-deploy redis when the PR is updated
       path: redis # Keep fly.toml in a subdirectory to avoid confusing flyctl
@@ -138,7 +140,7 @@ steps:
 
   - name: Deploy app
     id: deploy
-    uses: superfly/fly-pr-review-apps@1.0.0
+    uses: superfly/fly-pr-review-apps@1.3.0
     with:
       name: pr-${{ github.event.number }}-myapp-app
 ```

@@ -14,6 +14,10 @@ inputs:
     description: Optional pre-existing Docker image to use
   config:
     description: Optional path to a custom Fly toml config. Config path should be relative to `path` parameter, if specified.
+  build_args:
+    description: Optional Docker --build-arg
+  build_secrets:
+    description: Optional Docker --build-secret
   region:
     description: Region to launch the app in (alternatively, set the env FLY_REGION)
   org:
@@ -23,7 +27,7 @@ inputs:
   postgres:
     description: Optionally attach the app to a pre-existing Postgres cluster on Fly
   secrets:
-    description: Secrets to be set on the app. Separate multiple secrets with a space
+    description: Secrets to be set on the app at runtime. Separate multiple secrets with a space
   vmsize:
     description: Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.
   cpu:
