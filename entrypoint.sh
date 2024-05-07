@@ -18,7 +18,6 @@ EVENT_TYPE=$(jq -r .action /github/workflow/event.json)
 
 # Default the Fly app name to pr-{number}-{repo_owner}-{repo_name}
 app="${INPUT_NAME:-pr-$PR_NUMBER-$REPO_NAME}"
-region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
 config="${INPUT_CONFIG:-fly.toml}"
@@ -36,7 +35,7 @@ fi
 
 # Create the app if not present
 if ! flyctl status --app "$app"; then
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" --remote-only
+  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --org "$org" --remote-only
 fi
 
 if [ -n "$INPUT_SECRETS" ]; then
@@ -49,7 +48,7 @@ if [ -n "$INPUT_POSTGRES" ]; then
 fi
 
 # Deploy the app
-flyctl deploy --config "$config" --app "$app" --region "$region" --image "$image" --vm-memory "$INPUT_MEMORY" --remote-only --ha=false --strategy immediate
+flyctl deploy --config "$config" --app "$app" --image "$image" --vm-memory "$INPUT_MEMORY" --remote-only --ha=false --strategy immediate
 
 # Make some info available to the GitHub workflow.
 fly status --app "$app" --json >status.json
