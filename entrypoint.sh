@@ -24,6 +24,7 @@ region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
 config="${INPUT_CONFIG:-fly.toml}"
+dockerfile="$INPUT_DOCKERFILE"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "For safety, this action requires the app's name to contain the PR number."
@@ -40,7 +41,7 @@ fi
 if ! flyctl status --app "$app"; then
   # Backup the original config file since 'flyctl launch' messes up the [build.args] section
   cp "$config" "$config.bak"
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
+  flyctl launch --no-deploy --copy-config --name "$app" --dockerfile "$dockerfile" --image "$image" --region "$region" --org "$org"
   # Restore the original config file
   cp "$config.bak" "$config"
 fi
