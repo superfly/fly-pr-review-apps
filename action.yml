@@ -39,5 +39,5 @@ inputs:
     description: Create spare machines that increases app availability (default false)
     default: false
   allow_unsafe_name:
-    description: Allow the app name to be set without PR number
+    description: Allow a name that does not contain a PR number. Useful for deploying preview environments across multiple repo with reusable pipelines (default false)
     default: false

@@ -27,7 +27,7 @@ config="${INPUT_CONFIG:-fly.toml}"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   if [ "$INPUT_ALLOW_UNSAFE_NAME" != "true" ]; then
-    echo "For safety, this action requires the app's name to contain the PR number."
+    echo "For safety, this action requires the app's name to contain the PR number. If you are sure you want to proceed, set the 'allow_unsafe_name' input to 'true'."
     exit 1
   fi
   echo "WARNING: The app's name does not contain the PR number. it is recommended to include the PR number in the app's name."
