@@ -41,3 +41,5 @@ inputs:
   allow_unsafe_name:
     description: Allow a name that does not contain a PR number. Useful for deploying preview environments across multiple repo with reusable pipelines (default false)
     default: false
+  build_args:
+    description: Build arguments to pass to the Docker build. Separate multiple arguments with a semicolon. FOO=bar;BAZ=qux
