@@ -8,24 +8,25 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 
 ## Inputs
 
-| name       | description                                                                                                                                                                                              |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name       | description                                                                                                                                                                                          |
+| ---------- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `name`     | The name of the Fly app. Alternatively, set the env `FLY_APP`. For safety, must include the PR number. Example: `myapp-pr-${{ github.event.number }}`. Defaults to `pr-{number}-{repo_org}-{repo_name}`. |
-| `image`    | Optional pre-existing Docker image to use                                                                                                                                                                |
-| `config`   | Optional path to a custom Fly toml config. Config path should be relative to `path` parameter, if specified.                                                                                             |
-| `region`   | Which Fly region to run the app in. Alternatively, set the env `FLY_REGION`. Defaults to `iad`.                                                                                                          |
-| `org`      | Which Fly organization to launch the app under. Alternatively, set the env `FLY_ORG`. Defaults to `personal`.                                                                                            |
-| `path`     | Path to run the `flyctl` commands from. Useful if you have an existing `fly.toml` in a subdirectory.                                                                                                     |
-| `postgres` | Optional name of an existing Postgres cluster to `flyctl postgres attach` to.                                                                                                                            |
-| `update`   | Whether or not to update this Fly app when the PR is updated. Default `true`.                                                                                                                            |
-| `secrets`  | Secrets to be set on the app. Separate multiple secrets with a space                                                                                                                                     |
-| `vmsize`   | Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.                                                           |
-| `cpu`      | Set app VM CPU (defaults to 1 cpu). Default 1.                                                                                                                                                           |
-| `cpukind`  | Set app VM CPU kind - shared or performance. Default shared.                                                                                                                                             |
-| `memory`   | Set app VM memory in megabytes. Default 256.                                                                                                                                                                                      |
-| `ha` | Create spare machines that increases app availability. Default `false`. |
-| `allow_unsafe_name` | Allow a name that does not contain a PR number. Useful for deploying preview environments across multiple repo with reusable pipelines. Default `false`.                                                                                              |
-| `build_args`        | Build arguments to pass to the Docker build. Separate multiple arguments with a semicolon. `FOO=bar;BAZ=qux`                                                                                                                                     |
+| `image`    | Optional pre-existing Docker image to use                                                                                                                                                            |
+| `config`   | Optional path to a custom Fly toml config. Config path should be relative to `path` parameter, if specified.                                                                                         |
+| `region`   | Which Fly region to run the app in. Alternatively, set the env `FLY_REGION`. Defaults to `iad`.                                                                                                      |
+| `org`      | Which Fly organization to launch the app under. Alternatively, set the env `FLY_ORG`. Defaults to `personal`.                                                                                        |
+| `path`     | Path to run the `flyctl` commands from. Useful if you have an existing `fly.toml` in a subdirectory.                                                                                                 |
+| `postgres` | Optional name of an existing Postgres cluster to `flyctl postgres attach` to.                                                                                                                        |
+| `update`   | Whether or not to update this Fly app when the PR is updated. Default `true`.                                                                                                                        |
+| `secrets`  | Secrets to be set on the app. Separate multiple secrets with a space                                                                                                                                 |
+| `vmsize`   | Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.                                                       |
+| `cpu`      | Set app VM CPU (defaults to 1 cpu). Default 1.                                                                                                                                                       |
+| `cpukind`  | Set app VM CPU kind - shared or performance. Default shared.                                                                                                                                         |
+| `memory`   | Set app VM memory in megabytes. Default 256.                                                                                                                                                         |
+| `ha` | Create spare machines that increases app availability. Default `false`.                                                                                                                              |
+| `allow_unsafe_name` | Allow a name that does not contain a PR number. Useful for deploying preview environments across multiple repo with reusable pipelines. Default `false`.                                             |
+| `build_args`        | Optional Docker --build-arg Separate multiple arguments with a space                                                                                                                  |
+| `build_secrets` | Optional Docker --build-secret                                                                                                                                                                       |
 
 ## Required Secrets
 
@@ -63,7 +64,7 @@ jobs:
 
       - name: Deploy
         id: deploy
-        uses: superfly/fly-pr-review-apps@1.0.0
+        uses: superfly/fly-pr-review-apps@1.3.0
 ```
 
 ## Cleaning up GitHub environments

@@ -24,6 +24,9 @@ region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
 config="${INPUT_CONFIG:-fly.toml}"
+build_args=""
+build_secrets=""
+runtime_environment=""
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   if [ "$INPUT_ALLOW_UNSAFE_NAME" != "true" ]; then
@@ -39,11 +42,31 @@ if [ "$EVENT_TYPE" = "closed" ]; then
   exit 0
 fi
 
+#from https://github.com/superfly/fly-pr-review-apps/pull/50
+# FIXME spaces, maybe split by \D+=
+if [ -n "$INPUT_BUILD_ARGS" ]; then
+  for ARG in $(echo "$INPUT_BUILD_ARGS" | tr " " "\n"); do
+    build_args="$build_args --build-arg ${ARG}"
+  done
+fi
+
+if [ -n "$INPUT_BUILD_SECRETS" ]; then
+  for ARG in $(echo "$INPUT_BUILD_SECRETS" | tr " " "\n"); do
+    build_secrets="$build_secrets --build-secret ${ARG}"
+  done
+fi
+
+if [ -n "$INPUT_ENVIRONMENT" ]; then
+  for ARG in $(echo "$INPUT_ENVIRONMENT" | sed 's/\b\(\w\+\)=/\n\1=/g'); do
+    runtime_environment="$runtime_environment --env ${ARG}"
+  done
+fi
+
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
   # Backup the original config file since 'flyctl launch' messes up the [build.args] section
   cp "$config" "$config.bak"
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
+  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" ${build_args} ${build_secrets} ${runtime_environment}
   # Restore the original config file
   cp "$config.bak" "$config"
 fi
@@ -56,17 +79,12 @@ if [ -n "$INPUT_POSTGRES" ]; then
   flyctl postgres attach "$INPUT_POSTGRES" --app "$app" || true
 fi
 
-# create --build-arg array
-if [ -n "$INPUT_BUILD_ARGS" ]; then
-  BUILD_ARGS="--build-arg ${INPUT_BUILD_ARGS//;/ --build-arg }"
-fi
-
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
 if [ -n "$INPUT_VM" ]; then
-  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-size "$INPUT_VMSIZE" $BUILD_ARGS
+  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA ${build_args} ${build_secrets} ${runtime_environment} --vm-size "$INPUT_VMSIZE"
 else
-  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus $INPUT_CPU --vm-memory "$INPUT_MEMORY" $BUILD_ARGS
+  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA ${build_args} ${build_secrets} ${runtime_environment} --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus $INPUT_CPU --vm-memory "$INPUT_MEMORY"
 fi
 
 # Make some info available to the GitHub workflow.
