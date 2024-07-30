@@ -41,6 +41,9 @@ inputs:
   allow_unsafe_name:
     description: Allow a name that does not contain a PR number. Useful for deploying preview environments across multiple repo with reusable pipelines (default false)
     default: false
+  remote_only:
+    description: Add --remote-only flag to flyctl deploy command to use remote build. Improve build speed (default false)
+    default: false
   build_args:
     description: Optional Docker --build-arg
   build_secrets:

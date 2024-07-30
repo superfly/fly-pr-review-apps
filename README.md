@@ -25,6 +25,7 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 | `memory`   | Set app VM memory in megabytes. Default 256.                                                                                                                                                         |
 | `ha` | Create spare machines that increases app availability. Default `false`.                                                                                                                              |
 | `allow_unsafe_name` | Allow a name that does not contain a PR number. Useful for deploying preview environments across multiple repo with reusable pipelines. Default `false`.                                             |
+| `remote_only` | Add --remote-only flag to flyctl deploy command to use remote build. Improve build speed (default false)                                             |
 | `build_args`        | Optional Docker --build-arg Separate multiple arguments with a space                                                                                                                  |
 | `build_secrets` | Optional Docker --build-secret                                                                                                                                                                       |
 
