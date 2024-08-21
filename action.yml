@@ -22,6 +22,9 @@ inputs:
     description: path to a directory containing a fly.toml to clone
   postgres:
     description: Optionally attach the app to a pre-existing Postgres cluster on Fly
+  redis:
+    description: Optionally create a new Redis cluster on Fly and attach it to the app (Will destroy automatically)
+    default: false
   secrets:
     description: Secrets to be set on the app. Separate multiple secrets with a space
   vmsize:

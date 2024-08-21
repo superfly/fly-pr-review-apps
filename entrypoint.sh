@@ -39,6 +39,7 @@ fi
 # PR was closed - remove the Fly app if one exists and exit.
 if [ "$EVENT_TYPE" = "closed" ]; then
   flyctl apps destroy "$app" -y || true
+  flyctl redis destroy "redis-preview-$app" -y || true
   exit 0
 fi
 
@@ -77,6 +78,17 @@ fi
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
   flyctl postgres attach "$INPUT_POSTGRES" --app "$app" || true
+fi
+
+# Create a Redis instance if requested.
+if [ "$INPUT_REDIS" == "true" ]; then
+  #  TODO: issue
+  #    Error: regions codes must be specified in a comma-separated when not running interactively
+  REDIS_URL=$(script -q -c 'flyctl redis create --enable-eviction --name "redis-preview-'$app'" --region "'$region'" --org "'$org'"' .tmp-out | grep -o "redis://.*")
+  cat .tmp-out
+  if [ -n "$REDIS_URL" ]; then
+    flyctl secrets set "REDIS_URL"="$REDIS_URL" --app "$app"
+  fi
 fi
 
 # Use remote builders
