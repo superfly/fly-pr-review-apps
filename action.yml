@@ -10,6 +10,10 @@ runs:
 inputs:
   name:
     description: Fly app name
+  event_action:
+    description: Event action name
+    default: ${{ github.event.action }}
+    required: true
   image:
     description: Optional pre-existing Docker image to use
   config:
