@@ -27,6 +27,8 @@ config="${INPUT_CONFIG:-fly.toml}"
 build_args=""
 build_secrets=""
 runtime_environment=""
+database_name="${app/-/_}_pg"
+database_role="${app/-/_}_pg"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   if [ "$INPUT_ALLOW_UNSAFE_NAME" != "true" ]; then
@@ -39,6 +41,15 @@ fi
 # PR was closed - remove the Fly app if one exists and exit.
 if [ "$EVENT_TYPE" = "closed" ]; then
   flyctl apps destroy "$app" -y || true
+
+  if [ "$INPUT_POSTGRES_CLEAN_ON_CLOSE" == "true" && -n "$INPUT_POSTGRES" ]; then
+    flyctl postgres connect --app "$INPUT_POSTGRES" <<EOF || true
+      drop database ${database_name} with (force );
+      drop role ${database_role};
+      \q
+EOF
+  fi
+
   exit 0
 fi
 
@@ -64,11 +75,20 @@ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
-  # Backup the original config file since 'flyctl launch' messes up the [build.args] section
-  cp "$config" "$config.bak"
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" ${build_args} ${build_secrets} ${runtime_environment}
-  # Restore the original config file
-  cp "$config.bak" "$config"
+  if [ -n "$INPUT_CONFIG" ]; then
+    # Config specified explicitly, create empty app
+    flyctl app create --name "$app" --org "$org"
+  else
+    # Default behavior: launch the app inplace from default config
+    # TODO: https://github.com/superfly/fly-pr-review-apps/issues/49
+    #  Probably dont need to use launch for preview at all or adjust to launch only (handle redis/postgres deletion on destroy)
+
+    # Backup the original config file since 'flyctl launch' messes up the [build.args] section
+    cp "$config" "$config.bak"
+    flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" ${build_args} ${build_secrets} ${runtime_environment}
+    # Restore the original config file
+    cp "$config.bak" "$config"
+  fi
 fi
 if [ -n "$INPUT_SECRETS" ]; then
   echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
@@ -76,7 +96,7 @@ fi
 
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
-  flyctl postgres attach "$INPUT_POSTGRES" --app "$app" || true
+  flyctl postgres attach "$INPUT_POSTGRES" --app "$app" --database-name "$database_name" --database-user "$database_role" || true
 fi
 
 # Use remote builders
