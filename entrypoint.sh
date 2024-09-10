@@ -96,6 +96,38 @@ fi
 
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
+  pg_status=$(flyctl postgres list | grep "$INPUT_POSTGRES" | awk '{print $3}')
+  echo "Postgres status: $pg_status"
+
+  if [ "$pg_status" = "suspended" ]; then
+    echo "Postgres is suspended. Starting it..."
+    machine_id=$(fly machine list --app "$INPUT_POSTGRES" | tail -n 2 | head -n 1 | awk '{print $1}')
+    echo "machine_id: $machine_id"
+    flyctl machine start $machine_id --app "$INPUT_POSTGRES"
+  fi
+
+ # wait for postgres to be deployed
+  while [ "$pg_status" != "deployed" ]; do
+    sleep 3
+    pg_status=$(flyctl postgres list | grep "$INPUT_POSTGRES" | awk '{print $3}')
+    echo "Postgres status: $pg_status"
+    if [ "$pg_status" = "deployed" ]; then
+      # avoid Error: no active leader found
+      sleep 10
+    fi
+  done &
+  # run loop in background and save pid
+  pid=$!
+
+  #  timeout
+  sleep 120 && kill $pid && echo "Timeout waiting for postgres to deploy" && exit 1 &
+
+
+  #  back first job to foreground
+  fg 1 || true
+
+  echo "Postgres status: $pg_status"
+
   flyctl postgres attach "$INPUT_POSTGRES" --app "$app" --database-name "$database_name" --database-user "$database_role" || true
 fi
 
