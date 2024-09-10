@@ -14,35 +14,81 @@ if [ -z "$PR_NUMBER" ]; then
 fi
 
 GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
-EVENT_TYPE=$(jq -r .action /github/workflow/event.json)
+EVENT_TYPE=$INPUT_EVENT_ACTION
 
 # Default the Fly app name to pr-{number}-{repo_owner}-{repo_name}
 app="${INPUT_NAME:-pr-$PR_NUMBER-$GITHUB_REPOSITORY_OWNER-$GITHUB_REPOSITORY_NAME}"
-# Change underscores to hyphens.
-app="${app//_/-}"
+# Change underscores to hyphens and slashes to hyphens.
+app=$(echo "$app" | sed 's/_/-/g' | sed 's/\//-/g')
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
 config="${INPUT_CONFIG:-fly.toml}"
+build_args=""
+build_secrets=""
+runtime_environment=""
+database_name="${app/-/_}_pg"
+database_role="${app/-/_}_pg"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
-  echo "For safety, this action requires the app's name to contain the PR number."
-  exit 1
+  if [ "$INPUT_ALLOW_UNSAFE_NAME" != "true" ]; then
+    echo "For safety, this action requires the app's name to contain the PR number. If you are sure you want to proceed, set the 'allow_unsafe_name' input to 'true'."
+    exit 1
+  fi
+  echo "WARNING: The app's name does not contain the PR number. it is recommended to include the PR number in the app's name."
 fi
 
 # PR was closed - remove the Fly app if one exists and exit.
 if [ "$EVENT_TYPE" = "closed" ]; then
   flyctl apps destroy "$app" -y || true
+
+  if [ "$INPUT_POSTGRES_CLEAN_ON_CLOSE" == "true" && -n "$INPUT_POSTGRES" ]; then
+    flyctl postgres connect --app "$INPUT_POSTGRES" <<EOF || true
+      drop database ${database_name} with (force );
+      drop role ${database_role};
+      \q
+EOF
+  fi
+
   exit 0
+fi
+
+#from https://github.com/superfly/fly-pr-review-apps/pull/50
+# FIXME spaces, maybe split by \D+=
+if [ -n "$INPUT_BUILD_ARGS" ]; then
+  for ARG in $(echo "$INPUT_BUILD_ARGS" | tr " " "\n"); do
+    build_args="$build_args --build-arg ${ARG}"
+  done
+fi
+
+if [ -n "$INPUT_BUILD_SECRETS" ]; then
+  for ARG in $(echo "$INPUT_BUILD_SECRETS" | tr " " "\n"); do
+    build_secrets="$build_secrets --build-secret ${ARG}"
+  done
+fi
+
+if [ -n "$INPUT_ENVIRONMENT" ]; then
+  for ARG in $(echo "$INPUT_ENVIRONMENT" | sed 's/\b\(\w\+\)=/\n\1=/g'); do
+    runtime_environment="$runtime_environment --env ${ARG}"
+  done
 fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
-  # Backup the original config file since 'flyctl launch' messes up the [build.args] section
-  cp "$config" "$config.bak"
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
-  # Restore the original config file
-  cp "$config.bak" "$config"
+  if [ -n "$INPUT_CONFIG" ]; then
+    # Config specified explicitly, create empty app
+    flyctl app create --name "$app" --org "$org"
+  else
+    # Default behavior: launch the app inplace from default config
+    # TODO: https://github.com/superfly/fly-pr-review-apps/issues/49
+    #  Probably dont need to use launch for preview at all or adjust to launch only (handle redis/postgres deletion on destroy)
+
+    # Backup the original config file since 'flyctl launch' messes up the [build.args] section
+    cp "$config" "$config.bak"
+    flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" ${build_args} ${build_secrets} ${runtime_environment}
+    # Restore the original config file
+    cp "$config.bak" "$config"
+  fi
 fi
 if [ -n "$INPUT_SECRETS" ]; then
   echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
@@ -50,15 +96,52 @@ fi
 
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
-  flyctl postgres attach "$INPUT_POSTGRES" --app "$app" || true
+  pg_status=$(flyctl postgres list | grep "$INPUT_POSTGRES" | awk '{print $3}')
+  echo "Postgres status: $pg_status"
+
+  if [ "$pg_status" = "suspended" ]; then
+    echo "Postgres is suspended. Starting it..."
+    machine_id=$(fly machine list --app "$INPUT_POSTGRES" | tail -n 2 | head -n 1 | awk '{print $1}')
+    echo "machine_id: $machine_id"
+    flyctl machine start $machine_id --app "$INPUT_POSTGRES"
+  fi
+
+ # wait for postgres to be deployed
+  while [ "$pg_status" != "deployed" ]; do
+    sleep 3
+    pg_status=$(flyctl postgres list | grep "$INPUT_POSTGRES" | awk '{print $3}')
+    echo "Postgres status: $pg_status"
+    if [ "$pg_status" = "deployed" ]; then
+      # avoid Error: no active leader found
+      sleep 10
+    fi
+  done &
+  # run loop in background and save pid
+  pid=$!
+
+  #  timeout
+  sleep 120 && kill $pid && echo "Timeout waiting for postgres to deploy" && exit 1 &
+
+
+  #  back first job to foreground
+  fg 1 || true
+
+  echo "Postgres status: $pg_status"
+
+  flyctl postgres attach "$INPUT_POSTGRES" --app "$app" --database-name "$database_name" --database-user "$database_role" || true
+fi
+
+# Use remote builders
+if [ -n "$INPUT_REMOTE_ONLY" ]; then
+  remote_only="--remote-only"
 fi
 
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
 if [ -n "$INPUT_VM" ]; then
-  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-size "$INPUT_VMSIZE"
+  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA ${build_args} ${build_secrets} ${runtime_environment} ${remote_only} --vm-size "$INPUT_VMSIZE"
 else
-  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus $INPUT_CPU --vm-memory "$INPUT_MEMORY"
+  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA ${build_args} ${build_secrets} ${runtime_environment} ${remote_only} --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus $INPUT_CPU --vm-memory "$INPUT_MEMORY"
 fi
 
 # Make some info available to the GitHub workflow.

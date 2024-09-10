@@ -10,6 +10,10 @@ runs:
 inputs:
   name:
     description: Fly app name
+  event_action:
+    description: Event action name
+    default: ${{ github.event.action }}
+    required: true
   image:
     description: Optional pre-existing Docker image to use
   config:
@@ -22,6 +26,9 @@ inputs:
     description: path to a directory containing a fly.toml to clone
   postgres:
     description: Optionally attach the app to a pre-existing Postgres cluster on Fly
+  postgres_clean_on_close:
+    description: Drop database and role on Pull Request close event (default false)
+    default: false
   secrets:
     description: Secrets to be set on the app. Separate multiple secrets with a space
   vmsize:
@@ -38,3 +45,15 @@ inputs:
   ha:
     description: Create spare machines that increases app availability (default false)
     default: false
+  allow_unsafe_name:
+    description: Allow a name that does not contain a PR number. Useful for deploying preview environments across multiple repo with reusable pipelines (default false)
+    default: false
+  remote_only:
+    description: Add --remote-only flag to flyctl deploy command to use remote build. Improve build speed (default false)
+    default: false
+  build_args:
+    description: Optional Docker --build-arg
+  build_secrets:
+    description: Optional Docker --build-secret
+  environment:
+    description: Optional environment variables to set on the app. Separate multiple env vars with a space
