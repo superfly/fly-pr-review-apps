@@ -1,9 +1,6 @@
-name: "PR Review Apps on fly.io"
+name: "PR Review on fly.io"
 description: "Deploy temporary apps from pull requests on Fly.io"
-author: Fly
-branding:
-  icon: "upload-cloud"
-  color: "purple"
+author: Keane Moraes
 runs:
   using: "docker"
   image: "Dockerfile"
