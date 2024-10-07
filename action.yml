@@ -41,3 +41,6 @@ inputs:
   builder:
     description: Set builder to use - remote-only (default) or local-only
     default: remote-only
+  depot:
+    description: Set to use Depot
+    default: "true"
