@@ -38,3 +38,9 @@ inputs:
   ha:
     description: Create spare machines that increases app availability (default false)
     default: false
+  builder:
+    description: Set builder to use - remote-only (default) or local-only
+    default: remote-only
+  depot:
+    description: Set to use Depot
+    default: "true"
