@@ -55,11 +55,26 @@ fi
 
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
+opts="--config \"$config\" --app \"$app\" --regions \"$region\" --image \"$image\" --strategy immediate --ha=$INPUT_HA"
 if [ -n "$INPUT_VM" ]; then
-  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-size "$INPUT_VMSIZE"
+  opts="$opts --vm-size \"$INPUT_VMSIZE\""
 else
-  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus $INPUT_CPU --vm-memory "$INPUT_MEMORY"
+  opts="$opts --vm-cpu-kind \"$INPUT_CPUKIND\" --vm-cpus $INPUT_CPU --vm-memory \"$INPUT_MEMORY\""
 fi
+
+if [ -n $INPUT_NO_DB]; then
+  opts="$opts --no-db"
+fi
+
+if [ -n $INPUT_NO_REDIS]; then
+  opts="$opts --no-redis"
+fi
+
+if [ -n $INPUT_NO_OBJECT_STORAGE]; then
+  opts="$opts --no-object-storage"
+fi
+
+flyctl deploy $opts
 
 # Make some info available to the GitHub workflow.
 flyctl status --app "$app" --json >status.json
