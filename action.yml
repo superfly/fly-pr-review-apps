@@ -20,14 +20,8 @@ inputs:
     description: Organization to launch the app in (alternatively, set the env FLY_ORG)
   path:
     description: path to a directory containing a fly.toml to clone
-  no_db:
-    description: Optionally disable the automatic creation of a Database on Fly
   postgres:
     description: Optionally attach the app to a pre-existing Postgres cluster on Fly
-  no_redis:
-    description: Optionally disable the automatic creation of a redis instance on Fly
-  no_object_storage:
-    description: Optionally disable the automatic creation of Tigris object storage on Fly
   secrets:
     description: Secrets to be set on the app. Separate multiple secrets with a space
   vmsize:
@@ -44,3 +38,5 @@ inputs:
   ha:
     description: Create spare machines that increases app availability (default false)
     default: false
+  launch_options:
+    description: Additional options to pass to the Fly launch command at creation

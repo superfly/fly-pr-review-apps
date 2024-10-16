@@ -36,24 +36,11 @@ if [ "$EVENT_TYPE" = "closed" ]; then
   exit 0
 fi
 
-launch_opts=""
-if [ -n "$INPUT_NO_DB" ]; then
-  launch_opts="$launch_opts --no-db"
-fi
-
-if [ -n "$INPUT_NO_REDIS" ]; then
-  launch_opts="$launch_opts --no-redis"
-fi
-
-if [ -n "$INPUT_NO_OBJECT_STORAGE" ]; then
-  launch_opts="$launch_opts --no-object-storage"
-fi
-
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
   # Backup the original config file since 'flyctl launch' messes up the [build.args] section
   cp "$config" "$config.bak"
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"$launch_opts
+  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" $INPUT_LAUNCH_OPTIONS
   # Restore the original config file
   cp "$config.bak" "$config"
 fi
