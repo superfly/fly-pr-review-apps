@@ -24,6 +24,7 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 | `cpukind`  | Set app VM CPU kind - shared or performance. Default shared.                                                                                                                                             |
 | `memory`   | Set app VM memory in megabytes. Default 256.                                                                                                                                                             |
 | `ha`       | Create spare machines that increases app availability. Default `false`.                                                                                                                                  |
+| `launch_options`       | Attaches additional options to fly at app creation if specified                                                                                                                                  |
 
 ## Required Secrets
 
