@@ -36,7 +36,7 @@ if [ "$EVENT_TYPE" = "closed" ]; then
   exit 0
 fi
 
-launch_opts="--no-deploy --copy-config --name '$app' --image '$image' --region '$region' --org '$org'"
+launch_opts="--no-deploy --copy-config --name \"$app\" --image \"$image\" --region \"$region\" --org \"$org\""
 if [ -n "$INPUT_NO_DB" ]; then
   launch_opts="$launch_opts --no-db"
 fi
@@ -68,11 +68,11 @@ fi
 
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
-deploy_opts="--config '$config' --app '$app' --regions '$region' --image '$image' --strategy immediate --ha=$INPUT_HA"
+deploy_opts="--config \"$config\" --app \"$app\" --regions \"$region\" --image \"$image\" --strategy immediate --ha=$INPUT_HA"
 if [ -n "$INPUT_VM" ]; then
-  deploy_opts="$deploy_opts --vm-size '$INPUT_VMSIZE'"
+  deploy_opts="$deploy_opts --vm-size \"$INPUT_VMSIZE\""
 else
-  deploy_opts="$deploy_opts --vm-cpu-kind '$INPUT_CPUKIND' --vm-cpus '$INPUT_CPU' --vm-memory '$INPUT_MEMORY'"
+  deploy_opts="$deploy_opts --vm-cpu-kind \"$INPUT_CPUKIND\" --vm-cpus \"$INPUT_CPU\" --vm-memory \"$INPUT_MEMORY\""
 fi
 
 flyctl deploy $deploy_opts
