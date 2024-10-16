@@ -36,11 +36,24 @@ if [ "$EVENT_TYPE" = "closed" ]; then
   exit 0
 fi
 
+launch_opts="--no-deploy --copy-config --name \"$app\" --image \"$image\" --region \"$region\" --org \"$org\""
+if [ -n $INPUT_NO_DB]; then
+  launch_opts="$launch_opts --no-db"
+fi
+
+if [ -n $INPUT_NO_REDIS]; then
+  launch_opts="$launch_opts --no-redis"
+fi
+
+if [ -n $INPUT_NO_OBJECT_STORAGE]; then
+  launch_opts="$launch_opts --no-object-storage"
+fi
+
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
   # Backup the original config file since 'flyctl launch' messes up the [build.args] section
   cp "$config" "$config.bak"
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org"
+  flyctl launch $launch_opts
   # Restore the original config file
   cp "$config.bak" "$config"
 fi
@@ -55,26 +68,14 @@ fi
 
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
-opts="--config \"$config\" --app \"$app\" --regions \"$region\" --image \"$image\" --strategy immediate --ha=$INPUT_HA"
+deploy_opts="--config \"$config\" --app \"$app\" --regions \"$region\" --image \"$image\" --strategy immediate --ha=$INPUT_HA"
 if [ -n "$INPUT_VM" ]; then
-  opts="$opts --vm-size \"$INPUT_VMSIZE\""
+  deploy_opts="$deploy_opts --vm-size \"$INPUT_VMSIZE\""
 else
-  opts="$opts --vm-cpu-kind \"$INPUT_CPUKIND\" --vm-cpus $INPUT_CPU --vm-memory \"$INPUT_MEMORY\""
+  deploy_opts="$deploy_opts --vm-cpu-kind \"$INPUT_CPUKIND\" --vm-cpus $INPUT_CPU --vm-memory \"$INPUT_MEMORY\""
 fi
 
-if [ -n $INPUT_NO_DB]; then
-  opts="$opts --no-db"
-fi
-
-if [ -n $INPUT_NO_REDIS]; then
-  opts="$opts --no-redis"
-fi
-
-if [ -n $INPUT_NO_OBJECT_STORAGE]; then
-  opts="$opts --no-object-storage"
-fi
-
-flyctl deploy $opts
+flyctl deploy $deploy_opts
 
 # Make some info available to the GitHub workflow.
 flyctl status --app "$app" --json >status.json
