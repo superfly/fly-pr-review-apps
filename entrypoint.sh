@@ -27,8 +27,8 @@ config="${INPUT_CONFIG:-fly.toml}"
 build_args=""
 build_secrets=""
 runtime_environment=""
-database_name="${app/-/_}_pg"
-database_role="${app/-/_}_pg"
+database_name="$(echo "$app" | sed 's/-/_/g')_pg"
+database_role="$(echo "$app" | sed 's/-/_/g')_pg"
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   if [ "$INPUT_ALLOW_UNSAFE_NAME" != "true" ]; then
@@ -38,18 +38,21 @@ if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "WARNING: The app's name does not contain the PR number. it is recommended to include the PR number in the app's name."
 fi
 
-# PR was closed - remove the Fly app if one exists and exit.
-if [ "$EVENT_TYPE" = "closed" ]; then
-  flyctl apps destroy "$app" -y || true
-
-  if [ "$INPUT_POSTGRES_CLEAN_ON_CLOSE" == "true" && -n "$INPUT_POSTGRES" ]; then
+drop_db() {
     flyctl postgres connect --app "$INPUT_POSTGRES" <<EOF || true
       drop database ${database_name} with (force );
       drop role ${database_role};
       \q
 EOF
-  fi
+}
 
+# PR was closed - remove the Fly app if one exists and exit.
+if [ "$EVENT_TYPE" = "closed" ]; then
+  flyctl apps destroy "$app" -y || true
+
+  if [ "$INPUT_POSTGRES_CLEAN_ON_CLOSE" == "true" ] && [ -n "$INPUT_POSTGRES" ]; then
+    drop_db
+  fi
   exit 0
 fi
 
@@ -94,6 +97,11 @@ if [ -n "$INPUT_SECRETS" ]; then
   echo $INPUT_SECRETS | tr " " "\n" | flyctl secrets import --app "$app"
 fi
 
+
+if [ -n "$INPUT_RESET_DB" ] && [ -n "$INPUT_POSTGRES" ]; then
+  drop_db || true
+fi
+
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
   pg_status=$(flyctl postgres list | grep "$INPUT_POSTGRES" | awk '{print $3}')
@@ -130,6 +138,7 @@ if [ -n "$INPUT_POSTGRES" ]; then
 
   flyctl postgres attach "$INPUT_POSTGRES" --app "$app" --database-name "$database_name" --database-user "$database_role" || true
 fi
+
 
 # Use remote builders
 if [ -n "$INPUT_REMOTE_ONLY" ]; then

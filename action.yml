@@ -51,6 +51,9 @@ inputs:
   remote_only:
     description: Add --remote-only flag to flyctl deploy command to use remote build. Improve build speed (default false)
     default: false
+  reset_db:
+    description: Reset the database on each deploy (default false)
+    default: false
   build_args:
     description: Optional Docker --build-arg
   build_secrets:
