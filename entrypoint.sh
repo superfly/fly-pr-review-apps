@@ -48,7 +48,7 @@ if [ -n "$INPUT_POSTGRES" ]; then
 fi
 
 # Deploy the app
-flyctl deploy --config "$config" --app "$app" --image "$image" --vm-memory "$INPUT_MEMORY" --remote-only --ha=false --strategy immediate
+flyctl deploy --config "$config" --app "$app" --image "$image" --vm-memory "$INPUT_MEMORY" --remote-only --ha=false --strategy immediate --release-command-timeout 10m0s
 
 # Make some info available to the GitHub workflow.
 fly status --app "$app" --json >status.json
