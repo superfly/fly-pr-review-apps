@@ -120,11 +120,11 @@ if [ -n "$INPUT_POSTGRES" ]; then
   pid=$!
 
   #  timeout
-  sleep 120 && kill $pid && echo "Timeout waiting for postgres to deploy" && exit 1 &
+  sleep 300 && kill $pid && echo "Timeout waiting for postgres to deploy" && exit 1 &
 
 
   #  back first job to foreground
-  fg 1 || true
+  wait $pid
 
   echo "Postgres status: $pg_status"
 
