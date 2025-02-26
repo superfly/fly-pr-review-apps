@@ -42,3 +42,5 @@ inputs:
   ha:
     description: Create spare machines that increases app availability (default false)
     default: false
+  launch_options:
+    description: Additional options to pass to the Fly launch command at creation
