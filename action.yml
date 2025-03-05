@@ -44,3 +44,5 @@ inputs:
     default: false
   launch_options:
     description: Additional options to pass to the Fly launch command at creation
+  deploy_options:
+    description: Additional options to pass to the Fly deploy command
