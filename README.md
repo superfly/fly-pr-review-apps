@@ -27,6 +27,7 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 | `memory`   | Set app VM memory in megabytes. Default 256.                                                                                                                                                             |
 | `ha`       | Create spare machines that increases app availability. Default `false`.                                                                                                                                  |
 | `launch_options`       | Attaches additional options to fly at app creation if specified                                                                                                                                  |
+| `deploy_options` | Attaches additional options to the fly deploy command if specified |
 
 ## Required Secrets
 
