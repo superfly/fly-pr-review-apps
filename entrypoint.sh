@@ -54,7 +54,10 @@ fi
 if ! flyctl status --app "$app"; then
   # Backup the original config file since 'flyctl launch' messes up the [build.args] section
   cp "$config" "$config.bak"
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" ${build_args} ${build_secrets} $INPUT_LAUNCH_OPTIONS
+  set -f
+  # shellcheck disable=SC2086 # we want word splitting
+  IFS=' ' flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" ${build_args} ${build_secrets} $INPUT_LAUNCH_OPTIONS
+  set +f
   # Restore the original config file
   cp "$config.bak" "$config"
 fi
@@ -70,11 +73,15 @@ fi
 
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
+set -f
 if [ -n "$INPUT_VM" ]; then
-  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-size "$INPUT_VMSIZE"
+  # shellcheck disable=SC2086 # we want word splitting
+  IFS=' ' flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-size "$INPUT_VMSIZE"
 else
-  flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus "$INPUT_CPU" --vm-memory "$INPUT_MEMORY"
+  # shellcheck disable=SC2086 # we want word splitting
+  IFS=' ' flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus "$INPUT_CPU" --vm-memory "$INPUT_MEMORY"
 fi
+set +f
 
 # Make some info available to the GitHub workflow.
 flyctl status --app "$app" --json >status.json
