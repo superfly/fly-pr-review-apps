@@ -22,8 +22,8 @@ app="${INPUT_NAME:-pr-$PR_NUMBER-$GITHUB_REPOSITORY_OWNER-$GITHUB_REPOSITORY_NAM
 app=$(echo "$app" | sed 's/_/-/g')
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
-image="$INPUT_IMAGE"
 config="${INPUT_CONFIG:-fly.toml}"
+image_arg=""
 build_args=""
 build_secrets=""
 
@@ -50,13 +50,17 @@ if [ -n "$INPUT_BUILD_SECRETS" ]; then
   done
 fi
 
+if [ -n "$INPUT_IMAGE" ]; then
+  image_arg="--image $INPUT_IMAGE"
+fi
+
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
   # Backup the original config file since 'flyctl launch' messes up the [build.args] section
   cp "$config" "$config.bak"
   set -f
   # shellcheck disable=SC2086 # we want word splitting
-  IFS=' ' flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" ${build_args} ${build_secrets} $INPUT_LAUNCH_OPTIONS
+  IFS=' ' flyctl launch --no-deploy --copy-config --name "$app" $image_arg --region "$region" --org "$org" ${build_args} ${build_secrets} $INPUT_LAUNCH_OPTIONS
   set +f
   # Restore the original config file
   cp "$config.bak" "$config"
@@ -76,10 +80,10 @@ echo "Contents of config $config file: " && cat "$config"
 set -f
 if [ -n "$INPUT_VMSIZE" ]; then
   # shellcheck disable=SC2086 # we want word splitting
-  IFS=' ' flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-size "$INPUT_VMSIZE"
+  IFS=' ' flyctl deploy --config "$config" --app "$app" --regions "$region" $image_arg --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-size "$INPUT_VMSIZE"
 else
   # shellcheck disable=SC2086 # we want word splitting
-  IFS=' ' flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus "$INPUT_CPU" --vm-memory "$INPUT_MEMORY"
+  IFS=' ' flyctl deploy --config "$config" --app "$app" --regions "$region" $image_arg --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-cpu-kind "$INPUT_CPUKIND" --vm-cpus "$INPUT_CPU" --vm-memory "$INPUT_MEMORY"
 fi
 set +f
 
