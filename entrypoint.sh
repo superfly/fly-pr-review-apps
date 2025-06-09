@@ -74,7 +74,7 @@ fi
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
 set -f
-if [ -n "$INPUT_VM" ]; then
+if [ -n "$INPUT_VMSIZE" ]; then
   # shellcheck disable=SC2086 # we want word splitting
   IFS=' ' flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha="$INPUT_HA" ${build_args} ${build_secrets} --vm-size "$INPUT_VMSIZE"
 else
