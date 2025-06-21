@@ -71,6 +71,7 @@ fi
 # Trigger the deploy of the new version.
 echo "Contents of config $config file: " && cat "$config"
 if [ -n "$INPUT_VMSIZE" ]; then
+  fly machines destroy --force --app "$app" $(fly machines list --app "$app" --json | jq -r '[.[].id] | join(" ")')
   flyctl deploy --config "$config" --app "$app" --regions "$region" --image "$image" --strategy immediate --ha=$INPUT_HA ${build_args} ${build_secrets} --vm-size "$INPUT_VMSIZE"
 else
   fly machines destroy --force --app "$app" $(fly machines list --app "$app" --json | jq -r '[.[].id] | join(" ")')
