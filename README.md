@@ -28,6 +28,15 @@ If you have an existing `fly.toml` in your repo, this action will copy it with a
 | `ha`       | Create spare machines that increases app availability. Default `false`.                                                                                                                                  |
 | `launch_options`       | Attaches additional options to fly at app creation if specified                                                                                                                                  |
 
+## Outputs
+
+| name       | description              |
+| ---------- | ------------------------ |
+| `hostname` | The DNS hostname of the Fly app. |
+| `id`       | The Fly app machine’s unique ID on the Fly.io platform. |
+| `name`     | The name of the Fly app. |
+| `url`      | A `https` URL pointing to to the Fly app. |
+
 ## Required Secrets
 
 `FLY_API_TOKEN` - **Required**. The token to use for authentication. You can find a token by running `flyctl auth token` or going to your [user settings on fly.io](https://fly.io/user/personal_access_tokens).
