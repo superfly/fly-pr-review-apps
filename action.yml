@@ -27,7 +27,7 @@ inputs:
   postgres:
     description: Optionally attach the app to a pre-existing Postgres cluster on Fly
   secrets:
-    description: Secrets to be set on the app at runtime. Separate multiple secrets with a space
+    description: Secrets to be set on the app at runtime. Separate multiple secrets with a new line
   vmsize:
     description: Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.
   cpu:
