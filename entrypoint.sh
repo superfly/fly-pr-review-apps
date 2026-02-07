@@ -7,9 +7,10 @@ if [ -n "$INPUT_PATH" ]; then
   cd "$INPUT_PATH" || exit
 fi
 
-PR_NUMBER=$(jq -r .number /github/workflow/event.json)
-if [ -z "$PR_NUMBER" ]; then
-  echo "This action only supports pull_request actions."
+# Support both pull_request (.number) and issue_comment (.issue.number) events
+PR_NUMBER=$(jq -r '.number // .issue.number' /github/workflow/event.json)
+if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" = "null" ]; then
+  echo "Could not determine PR number. This action supports pull_request and issue_comment events."
   exit 1
 fi
 
