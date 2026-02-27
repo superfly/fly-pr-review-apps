@@ -21,7 +21,8 @@ This repository provides a Docker-based GitHub Action that deploys temporary Fly
 
 ## Change Rules
 
-- Keep scripts compatible with Alpine `/bin/sh` where applicable.
+- Keep scripts compatible with Alpine BusyBox `ash` (`/bin/ash`) for runtime entrypoint behavior.
+- Treat Alpine shell behavior as BusyBox `ash`, not Bash; only use shell features supported there.
 - If inputs/outputs change, update all of:
   - `action.yml`
   - `entrypoint.sh`
