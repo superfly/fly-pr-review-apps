@@ -13,6 +13,11 @@ if [ -z "$PR_NUMBER" ]; then
   exit 1
 fi
 
+get_cluster_id() {
+  
+}
+
+
 GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
 EVENT_TYPE=$(jq -r .action /github/workflow/event.json)
 
@@ -26,6 +31,11 @@ image="$INPUT_IMAGE"
 config="${INPUT_CONFIG:-fly.toml}"
 build_args=""
 build_secrets=""
+cluster_id=""
+
+if [ -n "${INPUT_MANAGED_POSTGRES}" ]; then
+  cluster_id=$(fly mpg list -o "${org}" -j | jq -r '.[] | select(.name == "'${INPUT_MANAGED_POSTGRES}'") | .id')
+fi
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "For safety, this action requires the app's name to contain the PR number."
@@ -34,6 +44,9 @@ fi
 
 # PR was closed - remove the Fly app if one exists and exit.
 if [ "$EVENT_TYPE" = "closed" ]; then
+  if [ -n "${cluster_id}" ]; then
+    flyctl mpg detach "${cluster_id}" --app "${app}" || true
+  fi
   flyctl apps destroy "$app" -y || true
   exit 0
 fi
@@ -64,14 +77,11 @@ if [ -n "$INPUT_SECRETS" ]; then
 fi
 
 # Attach postgres cluster to the app if specified.
-if [ -n "$INPUT_MANAGED_POSTGRES" ]; then
-  cluster_id=$(fly mpg list -o "${org}" -j | jq -r '.[] | select(.name == "'${INPUT_MANAGED_POSTGRES}'") | .id')
-  if [ -n "${cluster_id}" ]; then
+if [ -n "${cluster_id}" ]; then
     # fly throws an error if you try to attach a database with DATABASE_URL already set.
     # this bypasses that error, rather than trying to inspect the error message below
     flyctl secrets unset --app "${app}" DATABASE_URL
-  fi
-  flyctl mpg attach "$cluster_id" -a "$app"
+  flyctl mpg attach "${cluster_id}" -a "${app}"
 fi
 
 # Attach postgres cluster to the app if specified.
