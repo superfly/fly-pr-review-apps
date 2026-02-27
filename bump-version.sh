@@ -84,7 +84,7 @@ NEW_TAG="${MAJOR}.${MINOR}.${PATCH}"
 echo -e "${GREEN}Bumping $BUMP_TYPE version to: $NEW_TAG${NC}"
 
 # Create the new tag locally
-git tag $NEW_TAG
+git tag "$NEW_TAG"
 echo -e "${GREEN}Created tag $NEW_TAG${NC}"
 
 # Update the 'latest' tag if requested
@@ -98,13 +98,13 @@ fi
 if [ "$PUSH" = true ]; then
   if [ "$UPDATE_LATEST" = true ]; then
     echo -e "${GREEN}Pushing new version tag $NEW_TAG...${NC}"
-    git push origin $NEW_TAG
+    git push origin "$NEW_TAG"
 
     echo -e "${GREEN}Force-pushing latest tag...${NC}"
     git push --force origin latest
   else
     echo -e "${GREEN}Pushing tag $NEW_TAG...${NC}"
-    git push origin $NEW_TAG
+    git push origin "$NEW_TAG"
   fi
   echo -e "${GREEN}Tags pushed successfully!${NC}"
 else
