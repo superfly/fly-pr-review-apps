@@ -32,16 +32,16 @@ inputs:
     description: Set app VM to a named size, eg. shared-cpu-1x, dedicated-cpu-1x, dedicated-cpu-2x etc. Takes precedence over cpu, cpu kind, and memory inputs.
   cpu:
     description: Set app VM CPU (defaults to 1 cpu)
-    default: 1
+    default: "1"
   cpukind:
     description: Set app VM CPU kind - shared or performance. (defaults to shared)
-    default: shared
+    default: "shared"
   memory:
     description: Set app VM memory in megabytes (defaults to 256 megabytes)
-    default: 256
+    default: "256"
   ha:
     description: Create spare machines that increases app availability (default false)
-    default: false
+    default: "false"
   launch_options:
     description: Additional options to pass to the Fly launch command at creation
   deploy_options:
