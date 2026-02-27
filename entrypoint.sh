@@ -22,6 +22,8 @@ app="${INPUT_NAME:-pr-$PR_NUMBER-$GITHUB_REPOSITORY_OWNER-$GITHUB_REPOSITORY_NAM
 # Change underscores to hyphens.
 # shellcheck disable=SC3060
 app="${app//_/-}"
+# Change to lower case
+app=$(echo "$app" | tr '[:upper:]' '[:lower:]')
 region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
