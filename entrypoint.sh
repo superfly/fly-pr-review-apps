@@ -64,6 +64,11 @@ if [ -n "$INPUT_SECRETS" ]; then
 fi
 
 # Attach postgres cluster to the app if specified.
+if [ -n "$INPUT_MANAGED_POSTGRES" ]; then
+  flyctl mpg attach "$INPUT_MANAGED_POSTGRES" -a "$app"
+fi
+
+# Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_POSTGRES" ]; then
   flyctl postgres attach "$INPUT_POSTGRES" --app "$app" || true
 fi
