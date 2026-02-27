@@ -66,6 +66,11 @@ fi
 # Attach postgres cluster to the app if specified.
 if [ -n "$INPUT_MANAGED_POSTGRES" ]; then
   cluster_id=$(fly mpg list -o "${org}" -j | jq -r '.[] | select(.name == "'${INPUT_MANAGED_POSTGRES}'") | .id')
+  if [ -n "${cluster_id}" ]; then
+    # fly throws an error if you try to attach a database with DATABASE_URL already set.
+    # this bypasses that error, rather than trying to inspect the error message below
+    flyctl secrets -o "${org}" -a "${app}" unset DATABASE_URL
+  fi
   flyctl mpg attach "$cluster_id" -a "$app"
 fi
 
