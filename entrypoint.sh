@@ -13,10 +13,6 @@ if [ -z "$PR_NUMBER" ]; then
   exit 1
 fi
 
-get_cluster_id() {
-  
-}
-
 
 GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
 EVENT_TYPE=$(jq -r .action /github/workflow/event.json)
