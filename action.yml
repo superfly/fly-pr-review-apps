@@ -27,7 +27,7 @@ inputs:
   managed_postgres:
     description: Optionally attach the app to a pre-existing managed Postgres cluster on Fly
   postgres:
-    description: Optionally attach the app to a pre-existing Postgres (legacy) cluster on Fly
+    description: Optionally attach the app to a pre-existing Postgres (unmanaged) cluster on Fly
   secrets:
     description: Secrets to be set on the app at runtime. Separate multiple secrets with a space
   vmsize:
