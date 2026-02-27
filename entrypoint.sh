@@ -69,7 +69,7 @@ if [ -n "$INPUT_MANAGED_POSTGRES" ]; then
   if [ -n "${cluster_id}" ]; then
     # fly throws an error if you try to attach a database with DATABASE_URL already set.
     # this bypasses that error, rather than trying to inspect the error message below
-    flyctl secrets unset --org "${org}" --app "${app}" DATABASE_URL
+    flyctl secrets unset --app "${app}" DATABASE_URL
   fi
   flyctl mpg attach "$cluster_id" -a "$app"
 fi
